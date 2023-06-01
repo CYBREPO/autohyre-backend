@@ -84,7 +84,6 @@ exports.getAdditionDetails = async (req,res) => {
 //save new Vehicle details
 exports.setVehicleDetails = async (req, res) => {
     try {
-        console.log(req.body)
         if (req.body != null) {
             const vehicle = new vehicleModel(req.body);
 
