@@ -11,7 +11,7 @@ let vehicleDetails = basicModel.vehicle_basic_dtls;
 
 exports.getVehicleDetails = async (req, res) => {
     try {
-        let id = req.params.id;
+        let id = req.query.id;
         if (id > 0) {
             let v = await vehicleModel.findOne({ id: id }).exec();
             return res.status(constant.OK).json(v);
@@ -65,9 +65,9 @@ exports.getFilteredVehicleDetails = async (req, res) => {
 exports.getAdditionDetails = async (req,res) => {
     try {
         if(req.query.id){
-            let basic = await vehicleDetails.findOne({vehicleId: req.params.id});
+            let basic = await vehicleDetails.findOne({vehicleId: req.query.id});
 
-            let features = await vehicleFeature.findOne({vehicleId: req.params.id});
+            let features = await vehicleFeature.findOne({vehicleId: req.query.id});
 
             return res.status(constant.OK).json({
                 basicDetails: basic,
@@ -94,18 +94,18 @@ exports.setVehicleDetails = async (req, res) => {
                 //save basic details
                 let basicparams = {
                     "averageFuelEconomy": req.body.averageFuelEconomy,
-                    "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + req.body.fuelUnitLabel,
+                    "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
                     "cityFuelEconomy": req.body.cityFuelEconomy,
                     "fuelGrade": req.body.fuelGrade,
                     "fuelType": req.body.fuelType,
-                    "fuelTypeAndGradeLabel": (req.body.fuelType.label + req.body.fuelGrade),
+                    "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
                     "fuelUnit": req.body.fuelUnit,
                     "fuelUnitLabel": req.body.fuelUnitLabel,
                     "highwayFuelEconomy": req.body.highwayFuelEconomy,
                     "numberOfDoors": req.body.numberOfDoors,
-                    "numberOfDoorsLabel": (req.body.numberOfDoors + "Doors"),
+                    "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
                     "numberOfSeats": req.body.numberOfSeats,
-                    "numberOfSeatsLabel": (req.body.numberOfSeats + "Seats"),
+                    "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
                     "description": req.body.description,
                     "vehicleId": result._id,
                 }

@@ -14,6 +14,7 @@ const VehicleSchema = new mongoose.Schema(
         "type": String,
         "url": String,
         "vin": String,
+        "price": Number,
         "year": Number,
     }
 );
