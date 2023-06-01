@@ -4,6 +4,7 @@ const featureModel = require('../models/vehicle-features');
 const basicModel = require('../models/vehicle-basic-dtls');
 const constant = require('../constant/constant').constants;
 const fileUploads = require('./fileUpload-contoller');
+const { email } = require('./email');
 
 let vehicleModel = model.vehicle;
 let vehicleFeature = featureModel.vehicle_features;
@@ -62,12 +63,12 @@ exports.getFilteredVehicleDetails = async (req, res) => {
 
 }
 
-exports.getAdditionDetails = async (req,res) => {
+exports.getAdditionDetails = async (req, res) => {
     try {
-        if(req.query.id){
-            let basic = await vehicleDetails.findOne({vehicleId: req.query.id});
+        if (req.query.id) {
+            let basic = await vehicleDetails.findOne({ vehicleId: req.query.id });
 
-            let features = await vehicleFeature.findOne({vehicleId: req.query.id});
+            let features = await vehicleFeature.findOne({ vehicleId: req.query.id });
 
             return res.status(constant.OK).json({
                 basicDetails: basic,
@@ -145,6 +146,21 @@ exports.updateVehicleDetails = async (req, res) => {
     }
     catch (ex) {
         return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    }
+}
+
+exports.sendMail = async (req, res) => {
+    try {
+        if (req.body.vehicleId) {
+            let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
+
+            let info = await email({...v,mails:"chaitanyashirodkar010@gmail.com"});
+
+            res.status(200).json({message: "success"});
+        }
+    }
+    catch (ex) {
+
     }
 }
 
