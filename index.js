@@ -15,6 +15,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 dbConnect();
 server.use('/api/vehicle', require('./routers/vehicle-routers').router);
 server.use('/api/brand', require('./routers/brand-router').router);
+server.use('/api/location', require('./routers/location-router').router);
 
 server.listen((port??'8080'), () => {
     console.log("Start")
