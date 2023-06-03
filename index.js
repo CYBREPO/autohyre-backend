@@ -7,7 +7,7 @@ const path = require('path');
 const port = process.env.PORT;
 server.use(cors({
     credentials: true,
-    origin: ["http://localhost:2830"]
+    origin: ["http://localhost:2830","http://63.250.40.218"]
 }))
 
 server.use(express.json());
