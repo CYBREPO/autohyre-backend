@@ -19,5 +19,5 @@ server.use('/api/location', require('./routers/location-router').router);
 server.use('/api/email', require('./routers/email-router').router);
 
 server.listen((port??'8080'), () => {
-    console.log("Start")
+    console.log("Start on port",port);
 });
