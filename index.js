@@ -18,6 +18,6 @@ server.use('/api/brand', require('./routers/brand-router').router);
 server.use('/api/location', require('./routers/location-router').router);
 server.use('/api/email', require('./routers/email-router').router);
 
-server.listen((port??'8080'), () => {
+server.listen((port), () => {
     console.log("Start on port",port);
 });
