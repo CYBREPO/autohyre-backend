@@ -8,7 +8,7 @@ const { errorHandler } = require('./middleware/errorHandler');
 const port = process.env.PORT;
 server.use(cors({
     credentials: true,
-    origin: ["http://localhost:2830","http://63.250.40.218"]
+    origin: '*'
 }));
 
 
