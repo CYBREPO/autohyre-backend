@@ -3,30 +3,31 @@ const model = require('../models/vehicle');
 const featureModel = require('../models/vehicle-features');
 const basicModel = require('../models/vehicle-basic-dtls');
 const constant = require('../constant/constant').constants;
-const fileUploads = require('./fileUpload-contoller');
+const fileUploads = require('./fileUpload-controller');
 const { email } = require('./email');
+const asyncHandler = require('express-async-handler');
 
 let vehicleModel = model.vehicle;
 let vehicleFeature = featureModel.vehicle_features;
 let vehicleDetails = basicModel.vehicle_basic_dtls;
 
-exports.getVehicleDetails = async (req, res) => {
-    try {
+exports.getVehicleDetails = asyncHandler(async (req, res) => {
+    // try {
         let id = req.query.id;
         if (id > 0) {
             let v = await vehicleModel.findOne({ id: id }).exec();
             return res.status(constant.OK).json(v);
         }
 
-    }
-    catch (ex) {
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    }
+    // }
+    // catch (ex) {
+    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    // }
 
-}
+});
 
-exports.getFilteredVehicleDetails = async (req, res) => {
-    try {
+exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
+    // try {
         let vehicles = vehicleModel.find();
         // (await vehicles).every
         if (req.body) {
@@ -56,15 +57,15 @@ exports.getFilteredVehicleDetails = async (req, res) => {
 
 
 
-    }
-    catch (ex) {
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    }
+    // }
+    // catch (ex) {
+    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    // }
 
-}
+});
 
-exports.getAdditionDetails = async (req, res) => {
-    try {
+exports.getAdditionDetails = asyncHandler(async (req, res) => {
+    // try {
         if (req.query.id) {
             let basic = await vehicleDetails.findOne({ vehicleId: req.query.id });
 
@@ -76,15 +77,15 @@ exports.getAdditionDetails = async (req, res) => {
             });
         }
         return res.status(constant.VALIDATION_ERROR).json({ errorMessage: "Bad request" });
-    }
-    catch (ex) {
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    }
-}
+    // }
+    // catch (ex) {
+    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    // }
+});
 
 //save new Vehicle details
-exports.setVehicleDetails = async (req, res) => {
-    try {
+exports.setVehicleDetails = asyncHandler(async (req, res) => {
+    // try {
         if (req.body != null) {
             const vehicle = new vehicleModel(req.body);
 
@@ -117,21 +118,39 @@ exports.setVehicleDetails = async (req, res) => {
                 features.save();
                 const basic = new vehicleDetails(basicparams);
                 basic.save();
-                let uploadResult = await fileUploads.Uploads(req, result);
-                let message = "Vehicle added save successfully and " + uploadResult.message;
+                const files = req.files
+                let imgArray = await fileUploads.Uploads(files);
+                let uploadResult = imgArray.map(async (src, index) => {
+
+                    // create object to store data in the collection
+                    let finalImg = {
+                        filename: files[index].originalname,
+                        contentType: files[index].mimetype,
+                        imageBase64: src,
+                        vehicleId: result._id,
+                    }
+        
+                    let newUpload = new fileUpload.fileUpload(finalImg);
+        
+                    let result;
+                    result = await newUpload.save();
+        
+                });
+
+                let message = "Vehicle added save successfully";
                 return res.status(constant.OK).json({ message: message, data: result });
             }
         }
 
-    }
-    catch (ex) {
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    }
-}
+    // }
+    // catch (ex) {
+    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    // }
+});
 
 //update vehile details
-exports.updateVehicleDetails = async (req, res) => {
-    try {
+exports.updateVehicleDetails = asyncHandler(async (req, res) => {
+    // try {
         if (req.body != null) {
             const vehicle = new vehicleModel(req.body);
             vehicle.save((err, doc) => {
@@ -143,14 +162,14 @@ exports.updateVehicleDetails = async (req, res) => {
             });
         }
 
-    }
-    catch (ex) {
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    }
-}
+    // }
+    // catch (ex) {
+    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
+    // }
+});
 
-exports.sendMail = async (req, res) => {
-    try {
+exports.sendMail = asyncHandler(async (req, res) => {
+    // try {
         if (req.body.vehicleId) {
             let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
 
@@ -158,10 +177,10 @@ exports.sendMail = async (req, res) => {
 
             res.status(200).json({message: "success"});
         }
-    }
-    catch (ex) {
+    // }
+    // catch (ex) {
 
-    }
-}
+    // }
+});
 
 

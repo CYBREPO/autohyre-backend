@@ -36,7 +36,6 @@ exports.getAllBrands = async (req, res) => {
 exports.setBrands = async (req, res) => {
     try {
         if (req.body) {
-            console.log(req.file);
             let img = fs.readFileSync(req.file.path)
 
             let base64 = img.toString('base64');
