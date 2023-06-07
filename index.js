@@ -6,22 +6,30 @@ const server = express();
 const path = require('path');
 const { errorHandler } = require('./middleware/errorHandler');
 const port = process.env.PORT;
+
+//middleware
 server.use(cors({
     credentials: true,
     origin: '*'
 }));
 
-
 server.use(express.json());
 server.use(express.static(path.join(__dirname, 'public')));
 server.use(errorHandler);
+
+//database connect
 dbConnect();
+
+//routes
 server.use('/api/vehicle', require('./routers/vehicle-routers').router);
 server.use('/api/brand', require('./routers/brand-router').router);
 server.use('/api/location', require('./routers/location-router').router);
 server.use('/api/email', require('./routers/email-router').router);
 server.use('/api/host', require('./routers/host-router').router);
+server.use('/api/account', require('./routers/account').router);
+server.use('/api/teams', require('./routers/teams-router').router);
 
+//port
 server.listen((port), () => {
     console.log("Start on port",port);
 });

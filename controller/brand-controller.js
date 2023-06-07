@@ -22,6 +22,7 @@ exports.getAllBrands = async (req, res) => {
     try {
         // let id = req.params.id;
         // {
+            
         let v = await brandModel.find().exec();
         return res.status(constant.OK).json(v);
         // }

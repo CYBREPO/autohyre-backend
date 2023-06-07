@@ -12,175 +12,163 @@ let vehicleFeature = featureModel.vehicle_features;
 let vehicleDetails = basicModel.vehicle_basic_dtls;
 
 exports.getVehicleDetails = asyncHandler(async (req, res) => {
-    // try {
-        let id = req.query.id;
-        if (id > 0) {
-            let v = await vehicleModel.findOne({ id: id }).exec();
-            return res.status(constant.OK).json(v);
-        }
 
-    // }
-    // catch (ex) {
-    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    // }
+    let id = req.query.id;
+    if (id > 0) {
+        let v = await vehicleModel.findOne({ id: id }).exec();
+        return res.status(constant.OK).json(v);
+    }
 
 });
 
 exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
-    // try {
-        let vehicles = vehicleModel.find();
-        // (await vehicles).every
-        if (req.body) {
-            if (req.body.make) {
-                vehicles.where('make').in(req.body.make.split(","))
-            }
 
-            if (req.body.category) {
-                vehicles.where('type').in(req.body.category.split(","))
-            }
-
+    let vehicles = vehicleModel.find();
+    if (req.body) {
+        if (req.body.make) {
+            vehicles.where('make').in(req.body.make.split(","))
         }
 
-        let dbVehicle = await vehicles.exec();
-        let ids = dbVehicle.map(m => m._id);
-        let files = await fileUpload.find({ vehicleId: ids }).exec();
+        if (req.body.category) {
+            vehicles.where('type').in(req.body.category.split(","))
+        }
 
-        let temp = [];
-        dbVehicle.forEach(m => {
-            temp.push({
-                vehicle: m,
-                images: files.filter(x => x.vehicleId.toString() == m._id.toString())
-            })
+    }
+
+    let dbVehicle = await vehicles.exec();
+    let ids = dbVehicle.map(m => m._id);
+    let files = await fileUpload.find({ vehicleId: ids }).exec();
+
+    let temp = [];
+    dbVehicle.forEach(m => {
+        temp.push({
+            vehicle: m,
+            images: files.filter(x => x.vehicleId.toString() == m._id.toString())
         })
+    })
 
-        return res.status(constant.OK).json(temp)
+    return res.status(constant.OK).json(temp)
 
-
-
-    // }
-    // catch (ex) {
-    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    // }
 
 });
 
 exports.getAdditionDetails = asyncHandler(async (req, res) => {
     // try {
-        if (req.query.id) {
-            let basic = await vehicleDetails.findOne({ vehicleId: req.query.id });
+    if (req.query.id) {
+        let basic = await vehicleDetails.findOne({ vehicleId: req.query.id });
 
-            let features = await vehicleFeature.findOne({ vehicleId: req.query.id });
+        let features = await vehicleFeature.findOne({ vehicleId: req.query.id });
 
-            return res.status(constant.OK).json({
-                basicDetails: basic,
-                features: features
-            });
-        }
-        return res.status(constant.VALIDATION_ERROR).json({ errorMessage: "Bad request" });
-    // }
-    // catch (ex) {
-    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    // }
+        return res.status(constant.OK).json({
+            basicDetails: basic,
+            features: features
+        });
+    }
+    return res.status(constant.VALIDATION_ERROR).json({ errorMessage: "Bad request" });
+ 
 });
 
 //save new Vehicle details
 exports.setVehicleDetails = asyncHandler(async (req, res) => {
     // try {
-        if (req.body != null) {
-            const vehicle = new vehicleModel(req.body);
+    if (req.body != null) {
+        const vehicle = new vehicleModel(req.body);
 
-            let result;
-            result = await vehicle.save();
+        let result;
+        result = await vehicle.save();
 
-            if (result) {
-                //save basic details
-                let basicparams = {
-                    "averageFuelEconomy": req.body.averageFuelEconomy,
-                    "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
-                    "cityFuelEconomy": req.body.cityFuelEconomy,
-                    "fuelGrade": req.body.fuelGrade,
-                    "fuelType": req.body.fuelType,
-                    "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
-                    "fuelUnit": req.body.fuelUnit,
-                    "fuelUnitLabel": req.body.fuelUnitLabel,
-                    "highwayFuelEconomy": req.body.highwayFuelEconomy,
-                    "numberOfDoors": req.body.numberOfDoors,
-                    "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
-                    "numberOfSeats": req.body.numberOfSeats,
-                    "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
-                    "description": req.body.description,
-                    "vehicleId": result._id,
+        if (result) {
+            //save basic details
+            let basicparams = {
+                "averageFuelEconomy": req.body.averageFuelEconomy,
+                "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
+                "cityFuelEconomy": req.body.cityFuelEconomy,
+                "fuelGrade": req.body.fuelGrade,
+                "fuelType": req.body.fuelType,
+                "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
+                "fuelUnit": req.body.fuelUnit,
+                "fuelUnitLabel": req.body.fuelUnitLabel,
+                "highwayFuelEconomy": req.body.highwayFuelEconomy,
+                "numberOfDoors": req.body.numberOfDoors,
+                "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
+                "numberOfSeats": req.body.numberOfSeats,
+                "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
+                "description": req.body.description,
+                "vehicleId": result._id,
+            }
+
+            let requestBody = req.body;
+            requestBody["vehicleId"] = result._id;
+            const features = new vehicleFeature(requestBody);
+            features.save();
+            const basic = new vehicleDetails(basicparams);
+            basic.save();
+            const files = req.files
+            let imgArray = await fileUploads.Uploads(files);
+            let uploadResult = imgArray.map(async (src, index) => {
+
+                // create object to store data in the collection
+                let finalImg = {
+                    filename: files[index].originalname,
+                    contentType: files[index].mimetype,
+                    imageBase64: src,
+                    vehicleId: result._id,
                 }
 
-                let requestBody = req.body;
-                requestBody["vehicleId"] = result._id;
-                const features = new vehicleFeature(requestBody);
-                features.save();
-                const basic = new vehicleDetails(basicparams);
-                basic.save();
-                const files = req.files
-                let imgArray = await fileUploads.Uploads(files);
-                let uploadResult = imgArray.map(async (src, index) => {
+                let newUpload = new fileUpload.fileUpload(finalImg);
 
-                    // create object to store data in the collection
-                    let finalImg = {
-                        filename: files[index].originalname,
-                        contentType: files[index].mimetype,
-                        imageBase64: src,
-                        vehicleId: result._id,
-                    }
-        
-                    let newUpload = new fileUpload.fileUpload(finalImg);
-        
-                    let result;
-                    result = await newUpload.save();
-        
-                });
+                let result;
+                result = await newUpload.save();
 
-                let message = "Vehicle added save successfully";
-                return res.status(constant.OK).json({ message: message, data: result });
-            }
+            });
+
+            let message = "Vehicle added save successfully";
+            return res.status(constant.OK).json({ message: message, data: result });
         }
+    }
 
-    // }
-    // catch (ex) {
-    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    // }
 });
 
 //update vehile details
 exports.updateVehicleDetails = asyncHandler(async (req, res) => {
-    // try {
-        if (req.body != null) {
-            const vehicle = new vehicleModel(req.body);
-            vehicle.save((err, doc) => {
-                if (err) {
-                    return res.status(constant.VALIDATION_ERROR).json({ errorMessage: err.message });
-                }
-                let message = "Vehicle added save successfully";
-                return res.status(constant.OK).json({ message: message, data: doc });
-            });
-        }
-
-    // }
-    // catch (ex) {
-    //     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: ex.message });
-    // }
+    if (req.body != null) {
+        const vehicle = new vehicleModel(req.body);
+        vehicle.save((err, doc) => {
+            if (err) {
+                return res.status(constant.VALIDATION_ERROR).json({ errorMessage: err.message });
+            }
+            let message = "Vehicle added save successfully";
+            return res.status(constant.OK).json({ message: message, data: doc });
+        });
+    }
 });
 
 exports.sendMail = asyncHandler(async (req, res) => {
-    // try {
-        if (req.body.vehicleId) {
-            let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
+    if (req.body.vehicleId) {
+        let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
+        let emailBody = {
+            body: {
+                name: 'User',
+                intro: '',
+                table: {
+                    data: [{
+                        name: "dummy",
+                        email: "dummy",
+                        make: data._doc.make,
+                        model: data._doc.model,
+                        type: data._doc.type,
+                        year: data._doc.year,
+    
+                    }]
+                },
+                outro: ''
+            }
+        };
 
-            let info = await email({...v,mails:"chaitanyashirodkar010@gmail.com"});
+        let info = await email({ ...v, mails: "chaitanyashirodkar010@gmail.com", email: emailBody});
 
-            res.status(200).json({message: "success"});
-        }
-    // }
-    // catch (ex) {
-
-    // }
+        res.status(200).json({ message: "success" });
+    }
 });
 
 

@@ -11,10 +11,7 @@ exports.email = async (data) => {
                 pass: process.env.EMAILPASS,
             },
         });
-        console.log(data.mails);
-        console.log(data._doc);
-    
-    
+
         var mailGenerator = new Mailgen({
             theme: 'default',
             product: {
@@ -25,26 +22,9 @@ exports.email = async (data) => {
                 // logo: 'https://mailgen.js/img/logo.png'
             }
         });
-        var email = {
-            body: {
-                name: 'User',
-                intro: '',
-                table: {
-                    data: [{
-                        name: "dummy",
-                        email: "dummy",
-                        make: data._doc.make,
-                        model: data._doc.model,
-                        type: data._doc.type,
-                        year: data._doc.year,
+        
     
-                    }]
-                },
-                outro: ''
-            }
-        };
-    console.log(data.mails);
-        var emailBody = mailGenerator.generate(email);
+        var emailBody = mailGenerator.generate(data.email);
         var mailOptions = {
             from: process.env.EMAIL, // sender address
             to: data.mails, // list of receivers
