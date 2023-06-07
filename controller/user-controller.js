@@ -2,7 +2,7 @@
 const constant = require('../constant/constant').constants;
 const userModel = require('../models/user').user;
 const bcrypt = require('bcrypt');
-const { jwt } = require('jsonwebtoken');
+const jwt  = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { email } = require('./email');
 const fileUploadController = require('../controller/fileUpload-controller');
@@ -122,6 +122,9 @@ exports.resetPassword = asyncHandler(async (req, res) => {
         const minutes = now.getUTCMinutes();
         const seconds = now.getUTCSeconds();
 
+        const genLink = process.env.AUTOHYRELINK + "/account/reset-passeord/" + encryptController.encrypt(user._id) +
+            "/" + encryptController.encrypt(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
+
         let emailBody = {
             body: {
                 name: user.name,
@@ -131,8 +134,8 @@ exports.resetPassword = asyncHandler(async (req, res) => {
                     button: {
                         color: '#22BC66', // Optional action button color
                         text: 'Reset your Password',
-                        link: process.env.AUTOHYRELINK + "/account/reset-passeord/" + encryptController.encrypt(user._id) +
-                            + "/" + encryptController.encrypt(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`)
+                        link: process.env.AUTOHYRELINK + "/account/reset-password/" + encryptController.encrypt(user._id) +
+                            "/" + encryptController.encrypt(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`)
                     }
                 },
                 outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
