@@ -27,7 +27,9 @@ const LeardersSchema = mongoose.Schema({
             type: String,
             required: true
         },
-    }
+    },
+    'createdBy': mongoose.Types.ObjectId,
+    'modifiedBy': mongoose.Types.ObjectId,
 },
     {
         timestamps: true

@@ -18,6 +18,12 @@ const VehicleFeatureSchema = new mongoose.Schema(
         "usbCharger": Boolean,
         "usbInput": Boolean,
         "vehicleId": mongoose.Types.ObjectId,
+        'createdBy': mongoose.Types.ObjectId,
+        'modifiedBy': mongoose.Types.ObjectId,
+    },
+    {
+        timestamps: true
+
     }
 );
 

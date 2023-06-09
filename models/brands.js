@@ -19,6 +19,13 @@ const VehicleBrandSchema = new mongoose.Schema(
         required: true
       }
     },
+    "models": [{type: mongoose.Types.ObjectId, ref: 'carModel'}],
+    'createdBy': mongoose.Types.ObjectId,
+    'modifiedBy': mongoose.Types.ObjectId,
+  },
+  {
+      timestamps: true
+
   }
 );
 
