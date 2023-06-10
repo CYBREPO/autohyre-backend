@@ -35,6 +35,14 @@ const UserSchema = new mongoose.Schema(
     "isAdmin": {
       type: Boolean,
       required: true
+    },
+    "isActive": {
+      type: Boolean,
+      require: true,
+      default: true
+    },
+    "lastLogin": {
+      type: Date
     }
   },
   {

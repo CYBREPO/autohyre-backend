@@ -6,6 +6,7 @@ const { validateToken } = require('../middleware/authorization');
 
 exports.router = router.get("/getBrandById",controller.getBrandById)
                         .post("/getAllBrands",controller.getAllBrands)
+                        .post("/getAllModels",controller.getAllModels)
                         .post("/setBrands",validateToken,store.store.single('image'),controller.setBrands)
                         .post("/updateBrand",validateToken,store.store.single('image'),controller.updateBrand)
                         .post("/deleteBrand",validateToken,controller.deleteBrand)

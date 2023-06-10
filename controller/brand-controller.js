@@ -19,14 +19,32 @@ exports.getBrandById = asyncHandler(async (req, res) => {
 });
 
 exports.getAllBrands = asyncHandler(async (req, res) => {
-    let {pageSize, pageIndex} = req.body;
+    let { pageSize, pageIndex } = req.body;
     const totalCount = await brandModel.countDocuments();
-    if(totalCount > pageSize){
-        const result =  await brandModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
-        return res.status().json({ success: true, data: result, count: totalCount});
+    if (totalCount > pageSize) {
+        const result = await brandModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        return res.status().json({ success: true, data: result, count: totalCount });
     }
     const result = await brandModel.find().exec();
-    return res.status(constant.OK).json({ success: true, data: result, count: totalCount});
+    return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
+
+});
+
+exports.getAllModels = asyncHandler(async (req, res) => {
+    let { pageSize, pageIndex } = req.body;
+    const totalCount = await carModel.countDocuments();
+    if (pageSize) {
+        let result = await carModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        let ids = result.map(m => m._id);
+        const brands = await brandModel.find({ models: { $in: ids } }).exec();
+
+        result.forEach(m => {
+            let b = brands.find(x => (x.models?.length??0) > 1 ?  x.models.toString().includes(m._id.toString()) : false);
+            m['carCompany'] = b?.name??"";
+            m['carCompanyId'] = b?._id??"";
+        });
+        return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
+    }
 
 });
 
@@ -80,7 +98,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
 
         update['modifiedBy'] = req.user._id;
 
-        let result = await brandModel.findByIdAndUpdate(req.body[0].brandId, update, { new: true });
+        let result = await brandModel.findByIdAndUpdate(req.body.id, update, { new: true });
 
         if (result) {
             res.status(constant.OK).json({ success: true, message: "data updated successfully" });
@@ -95,7 +113,8 @@ exports.updateBrand = asyncHandler(async (req, res) => {
 exports.deleteBrand = asyncHandler(async (req, res) => {
     if (req.body) {
 
-        let del = await brandModel.findByIdAndDelete(req.body[0].brandId);
+        let del = await brandModel.findByIdAndDelete(req.body.id);
+
         if (del) {
             //deleting models linked to the brand
             result = await carModel.deleteMany({ _id: { $in: del.models } });

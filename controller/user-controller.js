@@ -2,7 +2,7 @@
 const constant = require('../constant/constant').constants;
 const userModel = require('../models/user').user;
 const bcrypt = require('bcrypt');
-const jwt  = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { email } = require('./email');
 const fileUploadController = require('../controller/fileUpload-controller');
@@ -16,6 +16,17 @@ exports.getUserDetails = asyncHandler(async (req, res) => {
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error("Invalid request");
+});
+
+exports.getUsers = asyncHandler(async (req, res) => {
+    let {pageSize, pageIndex} = req.body;
+    const totalCount = await userModel.countDocuments();
+    if(totalCount > pageSize){
+        const result =  await userModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        return res.status().json({ success: true, data: result, count: totalCount});
+    }
+    const result = await userModel.find().exec();
+    return res.status(constant.OK).json({ success: true, data: result, count: totalCount});
 });
 
 exports.registerUser = asyncHandler(async (req, res) => {
@@ -63,6 +74,26 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
 });
 
+exports.updateUserStatus = asyncHandler(async (req,res) => {
+    if(req.body._id){
+        const user = await userModel.findByIdAndUpdate(req.body._id,{isActive: req.body.isActive});
+
+        res.status(constant.OK).json({success: true, message: "User has been blocked"});
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Invalid request');
+});
+
+exports.deleteUser = asyncHandler(async (req,res) => {
+    if(req.query._id){
+        const user = await userModel.findByIdAndDelete(req.body._id);
+
+        res.status(constant.OK).json({success: true, message: "User has been deleted"});
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Invalid request');
+});
+
 exports.login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
@@ -71,7 +102,7 @@ exports.login = asyncHandler(async (req, res) => {
         throw new Error("Email and Password is required");
     }
 
-    const user = await userModel.findOne({ email }).exec();
+    const user = await userModel.findOneAndUpdate({ email: email, isActive: true}, {lastLogin: new Date()}).exec();
 
     if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign({
@@ -103,7 +134,7 @@ exports.login = asyncHandler(async (req, res) => {
     }
     else {
         res.status(constant.UNAUTHORIZED);
-        throw new Error("Invalid User Credentials");
+        throw new Error("Invalid User Credentials or User has been blocked");
     }
 
 });
@@ -151,6 +182,17 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 exports.updatePassword = asyncHandler(async (req, res) => {
     if (req.body) {
         const hashPassword = await bcrypt.hash(req.body.password, 10);
+        if (req.body.oldPassword != null && req.body.oldPassword != "") {
+            //check if old password matches
+            let userCheck = await userModel.findById(req.body.id).exec();
+
+            if (!userCheck || userCheck.password != hashPassword) {
+                res.status(constant.VALIDATION_ERROR);
+                throw new Error("Old password is invalid");
+            }
+
+        }
+
         let user = await userModel.findOneAndUpdate({ _id: req.body.id }, { password: hashPassword }).exec();
 
         if (!user) {
@@ -165,3 +207,31 @@ exports.updatePassword = asyncHandler(async (req, res) => {
         throw new Error('Invalid request');
     }
 });
+
+exports.updateUser = asyncHandler(async (req, res) => {
+    if (req.body) {
+        let update = {};
+        if (req.file) {
+            const base64 = await fileUploadController.SingleUpload(req.file);
+
+            update['profile'] = {
+                filename: req.file.originalname,
+                contentType: req.file.mimetype,
+                imageBase64: base64
+            }
+
+        }
+        update['name'] = req.body.name;
+        update['email'] = req.body.email;
+
+        let user = await userModel.findByIdAndUpdate(req.body.id,update,upsert=True).exec();
+
+        if (user) {
+            res.status(constant.OK).json({ success: true, message: 'User update successfully' });
+        }
+        // res.status(constant.VALIDATION_ERROR);
+        // throw new Error('user does not exists');
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Invalid request');
+})
