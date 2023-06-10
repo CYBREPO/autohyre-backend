@@ -26,20 +26,21 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
     // let vehicles = vehicleModel.find();
     let update = {}
     if (req.body) {
-        if (req.body.make) {
-            // vehicles.where('make').in(req.body.make.split(","))
+        if (req.body.make && req.body.make != "") {
             update["make"] = {$in: req.body.make.split(",")}
         }
 
-        if (req.body.category) {
+        if (req.body.category && req.body.category != "") {
             update["type"] = {$in: req.body.category.split(",")}
-            // vehicles.where('type').in(req.body.category.split(","))
+        }
+        if (req.body.price && req.body.price != "") {
+            update["price"] = {$lt: req.body.price}
         }
 
     }
 
     let dbVehicle;
-    switch (req.body.priceSort) {
+    switch (req.body.priceSort && req.body.priceSort != "") {
         case "low-to-high-0": dbVehicle = await vehicleModel.find(update).sort({price: -1}).exec();
             break;
         case "high-to-low-1": dbVehicle = await vehicleModel.find(update).sort({price: 1}).exec();
@@ -60,11 +61,6 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
             images: files.filter(x => x.vehicleId.toString() == m._id.toString())
         })
     });
-
-    if (req.body.priceSort) {
-        temp.sort()
-
-    }
 
     return res.status(constant.OK).json(temp)
 
