@@ -29,4 +29,5 @@ const VehicleBrandSchema = new mongoose.Schema(
   }
 );
 
+VehicleBrandSchema.index({"name": 'text'});
 exports.vehicle_brand = mongoose.model("vehicle_brand", VehicleBrandSchema);

@@ -6,6 +6,7 @@ const constant = require('../constant/constant').constants;
 const fileUploads = require('./fileUpload-controller');
 const { email } = require('./email');
 const asyncHandler = require('express-async-handler');
+const userModel = require('../models/user').user;
 
 let vehicleModel = model.vehicle;
 let vehicleFeature = featureModel.vehicle_features;
@@ -159,31 +160,40 @@ exports.updateVehicleDetails = asyncHandler(async (req, res) => {
 });
 
 exports.getVehicles = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex } = req.body;
-    const totalCount = await vehicleModel.countDocuments();
+    let { pageSize, pageIndex,searchText} = req.body;
+    let query = {};
+    if (searchText && searchText != "") {
+        query['$text'] = {$search: searchText};
+    }
+    const totalCount = await vehicleModel.countDocuments(query);
     if (totalCount > pageSize) {
-        const result = await vehicleModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        const result = await vehicleModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         return res.status().json({ success: true, data: result, count: totalCount });
     }
-    const result = await vehicleModel.find().exec();
+    const result = await vehicleModel.find(query).exec();
     return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
 });
 
 exports.sendMail = asyncHandler(async (req, res) => {
     if (req.body.vehicleId) {
         let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
+        let admin = await userModel.find({isAdmin: true}).exec();
         let emailBody = {
             body: {
                 name: 'User',
                 intro: '',
                 table: {
                     data: [{
-                        name: "dummy",
-                        email: "dummy",
+                        name: req.body.userDetails?.name?? "",
+                        email:  req.body.userDetails?.email?? "",
                         make: data._doc.make,
                         model: data._doc.model,
                         type: data._doc.type,
                         year: data._doc.year,
+                        pickup: req.body.pickupLocation?.address,
+                        pickupDate: req.body.pickupDate,
+                        drop: req.body.dropLocation?.address,
+                        dropDate: req.body.dropLocation?.address,
 
                     }]
                 },
@@ -191,8 +201,10 @@ exports.sendMail = asyncHandler(async (req, res) => {
             }
         };
 
-        let info = await email({ ...v, mails: "chaitanyashirodkar010@gmail.com", email: emailBody });
+        const mails = admin.map(m => m.email).toString() + "," + req.body.userDetails?.email;
 
+        let info = await email({ ...v, mails: mails, email: emailBody });
+        
         res.status(200).json({ message: "success" });
     }
 });

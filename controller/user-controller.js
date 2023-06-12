@@ -19,14 +19,19 @@ exports.getUserDetails = asyncHandler(async (req, res) => {
 });
 
 exports.getUsers = asyncHandler(async (req, res) => {
-    let {pageSize, pageIndex} = req.body;
-    const totalCount = await userModel.countDocuments();
-    if(totalCount > pageSize){
-        const result =  await userModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
-        return res.status().json({ success: true, data: result, count: totalCount});
+    let { pageSize, pageIndex, searchText } = req.body;
+    let query = {};
+    if (searchText && searchText != "") {
+        query['$text'] = {$search: searchText};
     }
-    const result = await userModel.find().exec();
-    return res.status(constant.OK).json({ success: true, data: result, count: totalCount});
+
+    const totalCount = await userModel.countDocuments(query);
+    if (totalCount > pageSize) {
+        const result = await userModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        return res.status().json({ success: true, data: result, count: totalCount });
+    }
+    const result = await userModel.find(query).exec();
+    return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
 });
 
 exports.registerUser = asyncHandler(async (req, res) => {
@@ -74,21 +79,29 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
 });
 
-exports.updateUserStatus = asyncHandler(async (req,res) => {
-    if(req.body._id){
-        const user = await userModel.findByIdAndUpdate(req.body._id,{isActive: req.body.isActive});
-
-        res.status(constant.OK).json({success: true, message: "User has been blocked"});
+exports.updateUserStatus = asyncHandler(async (req, res) => {
+    if (req.body.id) {
+        const user = await userModel.findByIdAndUpdate(req.body.id, { isActive: req.body.isActive });
+        if (user)
+            res.status(constant.OK).json({ success: true, message: "User has been blocked" });
+        else {
+            res.status(constant.VALIDATION_ERROR);
+            throw new Error('Record not found');
+        }
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error('Invalid request');
 });
 
-exports.deleteUser = asyncHandler(async (req,res) => {
-    if(req.query._id){
-        const user = await userModel.findByIdAndDelete(req.body._id);
-
-        res.status(constant.OK).json({success: true, message: "User has been deleted"});
+exports.deleteUser = asyncHandler(async (req, res) => {
+    if (req.query.id) {
+        const user = await userModel.findByIdAndDelete(req.query.id);
+        if(user)
+            res.status(constant.OK).json({ success: true, message: "User has been deleted" });
+        else{
+            res.status(constant.VALIDATION_ERROR);
+            throw new Error('User not deleted');
+        }
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error('Invalid request');
@@ -102,7 +115,7 @@ exports.login = asyncHandler(async (req, res) => {
         throw new Error("Email and Password is required");
     }
 
-    const user = await userModel.findOneAndUpdate({ email: email, isActive: true}, {lastLogin: new Date()}).exec();
+    const user = await userModel.findOneAndUpdate({ email: email, isActive: true }, { lastLogin: new Date() }).exec();
 
     if (user && (await bcrypt.compare(password, user.password))) {
         const token = jwt.sign({
@@ -223,8 +236,16 @@ exports.updateUser = asyncHandler(async (req, res) => {
         }
         update['name'] = req.body.name;
         update['email'] = req.body.email;
+        let user;
+        if (req.body.id && req.body.id != "") {
+            user = await userModel.findByIdAndUpdate(req.body.id, update, { upsert: true }).exec();
+        }
+        else {
+            update['password'] = 'Pass@123',
+                update['isAdmin'] = false
+            user = await userModel.create(update);
+        }
 
-        let user = await userModel.findByIdAndUpdate(req.body.id,update,upsert=True).exec();
 
         if (user) {
             res.status(constant.OK).json({ success: true, message: 'User update successfully' });

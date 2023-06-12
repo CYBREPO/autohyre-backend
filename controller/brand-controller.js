@@ -19,22 +19,30 @@ exports.getBrandById = asyncHandler(async (req, res) => {
 });
 
 exports.getAllBrands = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex } = req.body;
-    const totalCount = await brandModel.countDocuments();
+    let { pageSize, pageIndex, searchText} = req.body;
+    let query = {};
+    if (searchText && searchText != "") {
+        query['$text'] = {$search: searchText};
+    }
+    const totalCount = await brandModel.countDocuments(query);
     if (totalCount > pageSize) {
-        const result = await brandModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        const result = await brandModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         return res.status().json({ success: true, data: result, count: totalCount });
     }
-    const result = await brandModel.find().exec();
+    const result = await brandModel.find(query).exec();
     return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
 
 });
 
 exports.getAllModels = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex } = req.body;
-    const totalCount = await carModel.countDocuments();
+    let { pageSize, pageIndex, searchText} = req.body;
+    let query = {};
+    if (searchText && searchText != "") {
+        query['$text'] = {$search: searchText};
+    }
+    const totalCount = await carModel.countDocuments(query);
     if (pageSize) {
-        let result = await carModel.find().skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        let result = await carModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         let ids = result.map(m => m._id);
         const brands = await brandModel.find({ models: { $in: ids } }).exec();
 

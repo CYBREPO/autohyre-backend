@@ -25,4 +25,5 @@ const VehicleSchema = new mongoose.Schema(
     }
 );
 
+VehicleSchema.index({"make": 'text',"model": 'text',"year": 'text'});
 exports.vehicle = mongoose.model("vehicle", VehicleSchema);

@@ -16,4 +16,5 @@ const CarModelSchema = new mongoose.Schema(
   }
 );
 
+CarModelSchema.index({"name": "text"})
 exports.carModel = mongoose.model("carModel", CarModelSchema);

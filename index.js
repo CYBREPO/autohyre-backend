@@ -28,6 +28,7 @@ server.use('/api/email', require('./routers/email-router').router);
 server.use('/api/host', require('./routers/host-router').router);
 server.use('/api/account', require('./routers/account').router);
 server.use('/api/teams', require('./routers/teams-router').router);
+server.use('/api/pages', require('./routers/page-router').router);
 
 //port
 server.listen((port), () => {
