@@ -36,3 +36,12 @@ exports.getAllLeaders = asyncHandler(async (req, res) => {
 
     res.status(constants.OK).json({success: true, data : result });
 });
+
+exports.saveTeams = asyncHandler(async (req,res) => {
+    console.log(req.body);
+    if(req.body){
+        // console.log(req.files);
+    }
+    res.status(constants.OK).json();
+    // throw new Error('Invalid request');
+})
