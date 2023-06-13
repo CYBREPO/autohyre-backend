@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const mainSchema = mongoose.Schema(
+const aboutusSchema = mongoose.Schema(
     {
         header: {
             type: String,
@@ -41,12 +41,6 @@ const mainSchema = mongoose.Schema(
                 // required: true
             }
         },
-        features: [
-            {
-                title: {type: String},
-                description: {type: String}
-            }
-        ],
         isActive: {
             type: Boolean,
             default: true,
@@ -57,4 +51,4 @@ const mainSchema = mongoose.Schema(
     }
 );
 
-exports.ourLists = mongoose.model('ourList',mainSchema);
+exports.aboutus = mongoose.model('aboutus',aboutusSchema);

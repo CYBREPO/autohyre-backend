@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const { constants } = require('../constant/constant');
-const ourListModel = require('../models/ourLst');
+const ourListModel = require('../models/ourLst').ourLists;
 const fileUploadController = require('./fileUpload-controller');
 
 exports.getOurList = asyncHandler(async (req,res) => {
@@ -14,15 +14,16 @@ exports.getOurList = asyncHandler(async (req,res) => {
 
 exports.saveOurLink = asyncHandler(async (req, res) => {
     if (req.body) {
-        const { bannerImg, mainImg, features } = req.files;
+        const {features} = req.body;
+        const { bannerImg, mainImg  } = req.files;
 
         let banner = {};
         if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(brandImg);
+            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
 
             banner = {
-                filename: bannerImg.originalname,
-                contentType: bannerImg.mimetype,
+                filename: bannerImg[0].originalname,
+                contentType: bannerImg[0].mimetype,
                 imageBase64: base64
             }
 
@@ -30,11 +31,11 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
 
         let mainImage = {};
         if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(brandImg);
+            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
 
             mainImage = {
-                filename: bannerImg.originalname,
-                contentType: bannerImg.mimetype,
+                filename: mainImg[0].originalname,
+                contentType: mainImg[0].mimetype,
                 imageBase64: base64
             }
         }
@@ -57,7 +58,7 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
         });
 
         if(result){
-            res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
+            return res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -69,15 +70,17 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
 
 exports.updateOurList= asyncHandler(async (req, res) => {
     if (req.body) {
-        const { bannerImg, mainImg, features } = req.files;
+        
+        const {features} = req.body;
+        const { bannerImg, mainImg} = req.files;
 
         let banner = {};
         if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(brandImg);
+            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
 
             banner = {
-                filename: bannerImg.originalname,
-                contentType: bannerImg.mimetype,
+                filename: bannerImg[0].originalname,
+                contentType: bannerImg[0].mimetype,
                 imageBase64: base64
             }
 
@@ -85,11 +88,11 @@ exports.updateOurList= asyncHandler(async (req, res) => {
 
         let mainImage = {};
         if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(brandImg);
+            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
 
             mainImage = {
-                filename: bannerImg.originalname,
-                contentType: bannerImg.mimetype,
+                filename: mainImg[0].originalname,
+                contentType: mainImg[0].mimetype,
                 imageBase64: base64
             }
         }
@@ -112,7 +115,7 @@ exports.updateOurList= asyncHandler(async (req, res) => {
         });
 
         if(result){
-            res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
+           return res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');

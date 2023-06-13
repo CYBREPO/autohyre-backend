@@ -9,15 +9,15 @@ const teamsSchema = mongoose.Schema(
             filename: {
                 type: String,
                 // unique : true,
-                required: true
+                // required: true
             },
             contentType: {
                 type: String,
-                required: true
+                // required: true
             },
             imageBase64: {
                 type: String,
-                required: true
+                // required: true
             }
         },
         leaders: [
@@ -37,15 +37,15 @@ const teamsSchema = mongoose.Schema(
                     filename: {
                         type: String,
                         // unique : true,
-                        required: true
+                        // required: true
                     },
                     contentType: {
                         type: String,
-                        required: true
+                        // required: true
                     },
                     imageBase64: {
                         type: String,
-                        required: true
+                        // required: true
                     }
                 }
 
@@ -67,15 +67,15 @@ const teamsSchema = mongoose.Schema(
                 filename: {
                     type: String,
                     // unique : true,
-                    required: true
+                    // required: true
                 },
                 contentType: {
                     type: String,
-                    required: true
+                    // required: true
                 },
                 imageBase64: {
                     type: String,
-                    required: true
+                    // required: true
                 }
             }
 
