@@ -42,16 +42,18 @@ exports.getAllModels = asyncHandler(async (req, res) => {
     }
     const totalCount = await carModel.countDocuments(query);
     if (pageSize) {
+        let data = [];
         let result = await carModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         let ids = result.map(m => m._id);
         const brands = await brandModel.find({ models: { $in: ids } }).exec();
 
         result.forEach(m => {
             let b = brands.find(x => (x.models?.length??0) > 1 ?  x.models.toString().includes(m._id.toString()) : false);
-            m['carCompany'] = b?.name??"";
-            m['carCompanyId'] = b?._id??"";
+
+            data.push({_id: m._id.toString(),name: m.name,carCompany : b?.name??"",carCompanyId: b?._id??""})
+  
         });
-        return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
+        return res.status(constant.OK).json({ success: true, data: data, count: totalCount });
     }
 
 });
