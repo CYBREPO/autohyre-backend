@@ -10,7 +10,6 @@ exports.Uploads = async (files) => {
         // }
 
         // convert images into base64 encoding
-        console.log(files)
         let imgArray = files.map((file) => {
             let img = fs.readFileSync(file.path)
 

@@ -28,23 +28,26 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
     let update = {}
     if (req.body) {
         if (req.body.make && req.body.make != "") {
-            update["make"] = {$in: req.body.make.split(",")}
+            update["make"] = { $in: req.body.make.split(",") }
         }
 
         if (req.body.category && req.body.category != "") {
-            update["type"] = {$in: req.body.category.split(",")}
+            update["type"] = { $in: req.body.category.split(",") }
         }
         if (req.body.price && req.body.price != "") {
-            update["price"] = {$lt: req.body.price}
+            update["price"] = { $lt: req.body.price }
+        }
+        if (req.body.id && req.body.id != "") {
+            update["_id"] = { $eq: req.body.id }
         }
 
     }
 
     let dbVehicle;
     switch (req.body.priceSort && req.body.priceSort != "") {
-        case "low-to-high-0": dbVehicle = await vehicleModel.find(update).sort({price: -1}).exec();
+        case "low-to-high-0": dbVehicle = await vehicleModel.find(update).sort({ price: -1 }).exec();
             break;
-        case "high-to-low-1": dbVehicle = await vehicleModel.find(update).sort({price: 1}).exec();
+        case "high-to-low-1": dbVehicle = await vehicleModel.find(update).sort({ price: 1 }).exec();
             break;
         case "relevance": dbVehicle = await vehicleModel.find(update).exec();
             break;
@@ -63,7 +66,7 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
         })
     });
 
-    return res.status(constant.OK).json(temp)
+    return res.status(constant.OK).json({success: true, data: temp});
 
 
 });
@@ -76,8 +79,12 @@ exports.getAdditionDetails = asyncHandler(async (req, res) => {
         let features = await vehicleFeature.findOne({ vehicleId: req.query.id });
 
         return res.status(constant.OK).json({
-            basicDetails: basic,
-            features: features
+            success: true,
+            data: {
+                basicDetails: basic,
+                features: features
+            }
+
         });
     }
     return res.status(constant.VALIDATION_ERROR).json({ errorMessage: "Bad request" });
@@ -88,10 +95,8 @@ exports.getAdditionDetails = asyncHandler(async (req, res) => {
 exports.setVehicleDetails = asyncHandler(async (req, res) => {
     // try {
     if (req.body != null) {
-        const vehicle = new vehicleModel(req.body);
 
-        let result;
-        result = await vehicle.save();
+        let result = await vehicleModel.create(req.body);
 
         if (result) {
             //save basic details
@@ -131,10 +136,8 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
                     vehicleId: result._id,
                 }
 
-                let newUpload = new fileUpload.fileUpload(finalImg);
+                let newUpload = await fileUpload.create(finalImg);
 
-                let result;
-                result = await newUpload.save();
 
             });
 
@@ -143,6 +146,23 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
         }
     }
 
+});
+
+exports.deleteVehicle = asyncHandler(async (req, res) => {
+    if(req.query.id){
+        let veh = await vehicleModel.findByIdAndDelete(req.query.id);
+        if(veh){
+            await vehicleDetails.findOne({vehicleId: req.query.id});
+            await vehicleFeature.findOne({vehicleId: req.query.id});
+            await fileUpload.find({vehicleId: req.query.id});
+
+            res.status(constant.OK).json({success: true, message: "Deleted successfully"});
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong');
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Invalid request');
 });
 
 //update vehile details
@@ -160,10 +180,10 @@ exports.updateVehicleDetails = asyncHandler(async (req, res) => {
 });
 
 exports.getVehicles = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex,searchText} = req.body;
+    let { pageSize, pageIndex, searchText } = req.body;
     let query = {};
     if (searchText && searchText != "") {
-        query['$text'] = {$search: searchText};
+        query['$text'] = { $search: searchText };
     }
     const totalCount = await vehicleModel.countDocuments(query);
     if (totalCount > pageSize) {
@@ -177,15 +197,15 @@ exports.getVehicles = asyncHandler(async (req, res) => {
 exports.sendMail = asyncHandler(async (req, res) => {
     if (req.body.vehicleId) {
         let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
-        let admin = await userModel.find({isAdmin: true}).exec();
+        let admin = await userModel.find({ isAdmin: true }).exec();
         let emailBody = {
             body: {
                 name: 'User',
                 intro: '',
                 table: {
                     data: [{
-                        name: req.body.userDetails?.name?? "",
-                        email:  req.body.userDetails?.email?? "",
+                        name: req.body.userDetails?.name ?? "",
+                        email: req.body.userDetails?.email ?? "",
                         make: data._doc.make,
                         model: data._doc.model,
                         type: data._doc.type,
@@ -204,7 +224,7 @@ exports.sendMail = asyncHandler(async (req, res) => {
         const mails = admin.map(m => m.email).toString() + "," + req.body.userDetails?.email;
 
         let info = await email({ ...v, mails: mails, email: emailBody });
-        
+
         res.status(200).json({ message: "success" });
     }
 });

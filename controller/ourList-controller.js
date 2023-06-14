@@ -3,10 +3,10 @@ const { constants } = require('../constant/constant');
 const ourListModel = require('../models/ourLst').ourLists;
 const fileUploadController = require('./fileUpload-controller');
 
-exports.getOurList = asyncHandler(async (req,res) => {
+exports.getOurList = asyncHandler(async (req, res) => {
     const result = await ourListModel.findOne().exec();
-    if(result){
-        res.status(constants.OK).json({success: true, data: result});
+    if (result) {
+        res.status(constants.OK).json({ success: true, data: result });
     }
     res.status(constants.VALIDATION_ERROR);
     throw new Error("Not Found");
@@ -14,8 +14,8 @@ exports.getOurList = asyncHandler(async (req,res) => {
 
 exports.saveOurLink = asyncHandler(async (req, res) => {
     if (req.body) {
-        const {features} = req.body;
-        const { bannerImg, mainImg  } = req.files;
+        const { features } = req.body;
+        const { bannerImg, mainImg } = req.files;
 
         let banner = {};
         if (bannerImg) {
@@ -57,8 +57,8 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
             footer: req.body.footer,
         });
 
-        if(result){
-            return res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
+        if (result) {
+            return res.status(constants.OK).json({ success: true, meesage: "our list saved successfully" });
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -68,13 +68,13 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
     throw new Error('Invalid request');
 });
 
-exports.updateOurList= asyncHandler(async (req, res) => {
+exports.updateOurList = asyncHandler(async (req, res) => {
     if (req.body) {
-        
-        const {features} = req.body;
-        const { bannerImg, mainImg} = req.files;
 
-        let banner = {};
+        const { features } = req.body;
+        const { bannerImg, mainImg } = req.files;
+
+        let banner;
         if (bannerImg) {
             const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
 
@@ -86,7 +86,7 @@ exports.updateOurList= asyncHandler(async (req, res) => {
 
         }
 
-        let mainImage = {};
+        let mainImage;
         if (mainImg) {
             const base64 = await fileUploadController.SingleUpload(mainImg[0]);
 
@@ -105,17 +105,25 @@ exports.updateOurList= asyncHandler(async (req, res) => {
             })
         });
 
-        const result = await ourListModel.findByIdAndUpdate(req.body.id,{
+        let param = {
             header: req.body.header,
             bannerImg: banner,
             mainImg: mainImage,
             features: featuredArr,
             body: req.body.body,
-            footer: req.body.footer,
-        });
+            footer: req.body.footer
+        }
 
-        if(result){
-           return res.status(constants.OK).json({success: true, meesage: "our list saved successfully"});
+        if (banner)
+            param['bannerImg'] = banner;
+
+        if (mainImage)
+            param['mainImg'] = mainImage;
+
+        const result = await ourListModel.updateOne({ _id: req.body.id }, { $set: param });
+
+        if (result) {
+            return res.status(constants.OK).json({ success: true, meesage: "our list saved successfully" });
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');

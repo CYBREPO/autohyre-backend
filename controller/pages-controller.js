@@ -160,7 +160,7 @@ exports.updateAboutus= asyncHandler(async (req, res) => {
     
         const { bannerImg, mainImg} = req.files;
 
-        let banner = {};
+        let banner;
         if (bannerImg) {
             const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
 
@@ -172,7 +172,7 @@ exports.updateAboutus= asyncHandler(async (req, res) => {
 
         }
 
-        let mainImage = {};
+        let mainImage;
         if (mainImg) {
             const base64 = await fileUploadController.SingleUpload(mainImg[0]);
 
@@ -183,13 +183,19 @@ exports.updateAboutus= asyncHandler(async (req, res) => {
             }
         }
 
-        const result = await aboutusModel.findByIdAndUpdate(req.body.id,{
+        let param = {
             header: req.body.header,
-            bannerImg: banner,
-            mainImg: mainImage,
             body: req.body.body,
             footer: req.body.footer,
-        });
+        };
+
+        if(banner)
+            param["bannerImg"] = banner
+
+        if(mainImage)
+            param["mainImg"] = mainImage
+
+        const result = await aboutusModel.updateOne({_id: req.body.id},{$set: param});
 
         if(result){
            return res.status(constant.OK).json({success: true, meesage: "about us saved successfully"});

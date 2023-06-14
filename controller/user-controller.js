@@ -22,7 +22,7 @@ exports.getUsers = asyncHandler(async (req, res) => {
     let { pageSize, pageIndex, searchText } = req.body;
     let query = {};
     if (searchText && searchText != "") {
-        query['$text'] = {$search: searchText};
+        query['$text'] = { $search: searchText };
     }
 
     const totalCount = await userModel.countDocuments(query);
@@ -96,9 +96,9 @@ exports.updateUserStatus = asyncHandler(async (req, res) => {
 exports.deleteUser = asyncHandler(async (req, res) => {
     if (req.query.id) {
         const user = await userModel.findByIdAndDelete(req.query.id);
-        if(user)
+        if (user)
             res.status(constant.OK).json({ success: true, message: "User has been deleted" });
-        else{
+        else {
             res.status(constant.VALIDATION_ERROR);
             throw new Error('User not deleted');
         }
@@ -127,7 +127,7 @@ exports.login = asyncHandler(async (req, res) => {
             }
         },
             process.env.JWT_SECRET,
-            { expiresIn: "10m" });
+            { expiresIn: "100m" });
 
         let param = {
             message: "Logged In Successfully",
@@ -241,14 +241,14 @@ exports.updateUser = asyncHandler(async (req, res) => {
             user = await userModel.findByIdAndUpdate(req.body.id, update, { upsert: true }).exec();
         }
         else {
-            update['password'] = 'Pass@123',
-                update['isAdmin'] = false
+            update['password'] =  await bcrypt.hash('Pass@123', 10);
+            update['isAdmin'] = false
             user = await userModel.create(update);
         }
 
 
         if (user) {
-            res.status(constant.OK).json({ success: true, message: 'User update successfully' });
+            return res.status(constant.OK).json({ success: true, message: 'User Details Saved successfully' ,data: user});
         }
         // res.status(constant.VALIDATION_ERROR);
         // throw new Error('user does not exists');

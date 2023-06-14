@@ -46,9 +46,9 @@ exports.getAllModels = asyncHandler(async (req, res) => {
         let result = await carModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         let ids = result.map(m => m._id);
         const brands = await brandModel.find({ models: { $in: ids } }).exec();
-
+    
         result.forEach(m => {
-            let b = brands.find(x => (x.models?.length??0) > 1 ?  x.models.toString().includes(m._id.toString()) : false);
+            let b = brands.find(x => (x.models?.length??0) > 0 ?  x.models.toString().includes(m._id.toString()) : false);
 
             data.push({_id: m._id.toString(),name: m.name,carCompany : b?.name??"",carCompanyId: b?._id??""})
   
@@ -102,7 +102,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
             };
         }
 
-        if (req.body.name != "" && req.name != null) {
+        if (req.body.name != "" && req.body.name != null) {
             update['name'] = req.body.name;
         }
 
@@ -111,7 +111,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
         let result = await brandModel.findByIdAndUpdate(req.body.id, update, { new: true });
 
         if (result) {
-            res.status(constant.OK).json({ success: true, message: "data updated successfully" });
+            return res.status(constant.OK).json({ success: true, message: "data updated successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error("Error occured");
@@ -129,7 +129,7 @@ exports.deleteBrand = asyncHandler(async (req, res) => {
             //deleting models linked to the brand
             result = await carModel.deleteMany({ _id: { $in: del.models } });
 
-            res.status(200).json({ success: true, message: "Record deleted successfully" });
+            return res.status(200).json({ success: true, message: "Record deleted successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error("Error occured");
@@ -173,3 +173,57 @@ exports.setModels = asyncHandler(async (req, res) => {
     throw new Error("Invalid request");
 
 });
+
+exports.saveModel = asyncHandler(async (req, res) => {
+    if (req.body) {
+
+        let result;
+
+        result = await carModel.create({name: req.body.name, createdBy: req.user._id});
+
+        if (result) {
+            const b = await brandModel.findByIdAndUpdate(req.body.brandId, { $push: { models: result._id } });
+            
+            return res.status(constant.OK).json({ success: true, message: "Success" });
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error("Error occured");
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Invalid request");
+
+});
+
+exports.updateModel = asyncHandler(async (req, res) => {
+    if (req.body) {
+
+        let result;
+
+        result = await carModel.findByIdAndUpdate(req.body.id, {name: req.body.name, modifiedBy: req.user._id}).exec();
+
+        if (result) {
+            return res.status(constant.OK).json({ success: true, message: "Success" });
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error("Error occured");
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Invalid request");
+
+});
+
+exports.deleteModel = asyncHandler(async (req,res) => {
+    if(req.query.id){
+        let models = await carModel.findByIdAndDelete(req.query.id).exec();
+
+        if(models){
+            await brandModel.findOneAndUpdate({$pull : { models: {$in: models._id }}});
+
+            return res.status(constant.OK).json({ success: true, message: "Success" });
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error("Error occured");
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Invalid request");
+})
