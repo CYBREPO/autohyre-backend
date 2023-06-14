@@ -3,6 +3,7 @@ const pageModel = require('../models/pages').page;
 const constant = require('../constant/constant').constants;
 const fileUploadController = require('./fileUpload-controller');
 const aboutusModel = require('../models/aboutus').aboutus;
+const homeModel = require('../models/home').home;
 
 
 exports.getPages = asyncHandler(async (req, res) => {
@@ -10,7 +11,7 @@ exports.getPages = asyncHandler(async (req, res) => {
     const totalCount = await pageModel.countDocuments();
 
     if (result) {
-        return res.status(constant.OK).json({ success: true, data: result,count: totalCount});
+        return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error("Something went wrong");
@@ -99,10 +100,10 @@ exports.updatePage = asyncHandler(async (req, res) => {
     throw new Error("Invalid Request");
 });
 
-exports.getAboutus = asyncHandler(async (req,res) => {
+exports.getAboutus = asyncHandler(async (req, res) => {
     const result = await aboutusModel.findOne().exec();
-    if(result){
-        res.status(constant.OK).json({success: true, data: result});
+    if (result) {
+        return res.status(constant.OK).json({ success: true, data: result });
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error("Not Found");
@@ -110,7 +111,7 @@ exports.getAboutus = asyncHandler(async (req,res) => {
 
 exports.saveAboutus = asyncHandler(async (req, res) => {
     if (req.body) {
-        const { bannerImg, mainImg  } = req.files;
+        const { bannerImg, mainImg } = req.files;
 
         let banner = {};
         if (bannerImg) {
@@ -144,8 +145,8 @@ exports.saveAboutus = asyncHandler(async (req, res) => {
             footer: req.body.footer,
         });
 
-        if(result){
-            return res.status(constant.OK).json({success: true, meesage: "About us saved successfully"});
+        if (result) {
+            return res.status(constant.OK).json({ success: true, meesage: "About us saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -155,10 +156,10 @@ exports.saveAboutus = asyncHandler(async (req, res) => {
     throw new Error('Invalid request');
 });
 
-exports.updateAboutus= asyncHandler(async (req, res) => {
+exports.updateAboutus = asyncHandler(async (req, res) => {
     if (req.body) {
-    
-        const { bannerImg, mainImg} = req.files;
+
+        const { bannerImg, mainImg } = req.files;
 
         let banner;
         if (bannerImg) {
@@ -189,16 +190,16 @@ exports.updateAboutus= asyncHandler(async (req, res) => {
             footer: req.body.footer,
         };
 
-        if(banner)
+        if (banner)
             param["bannerImg"] = banner
 
-        if(mainImage)
+        if (mainImage)
             param["mainImg"] = mainImage
 
-        const result = await aboutusModel.updateOne({_id: req.body.id},{$set: param});
+        const result = await aboutusModel.updateOne({ _id: req.body.id }, { $set: param });
 
-        if(result){
-           return res.status(constant.OK).json({success: true, meesage: "about us saved successfully"});
+        if (result) {
+            return res.status(constant.OK).json({ success: true, meesage: "about us saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -206,4 +207,117 @@ exports.updateAboutus= asyncHandler(async (req, res) => {
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error('Invalid request');
+});
+
+exports.getHome = asyncHandler(async (req, res) => {
+    const result = await homeModel.findOne({}).exec();
+    if (result) {
+        return res.status(constant.OK).json({ success: true, data: result });
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Not Found");
+});
+
+exports.saveHome = asyncHandler(async (req, res) => {
+    if (req.body) {
+        const { bannerImages, mainImg } = req.files;
+
+        let banner = [];
+        if (bannerImages) {
+            const imgArray = await fileUploadController.Uploads(bannerImages);
+            banner.push({
+                filename: bannerImages[index].originalname,
+                contentType: bannerImages[index].mimetype,
+                imageBase64: imgArray[index]
+            });
+
+        }
+
+        let mainImage;
+        if (mainImg) {
+            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
+
+            mainImage = {
+                filename: mainImg[0].originalname,
+                contentType: mainImg[0].mimetype,
+                imageBase64: base64
+            }
+        }
+
+
+        const result = await homeModel.create({
+            bannerContent: req.body.bannerContent,
+            header: req.body.header,
+            bannerImages: banner,
+            mainImg: mainImage,
+            body: req.body.body,
+            footer: req.body.footer,
+        });
+
+        if (result) {
+            return res.status(constant.OK).json({ success: true, meesage: "Home page saved successfully" });
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong');
+
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Invalid Request");
+});
+
+exports.updateHome = asyncHandler(async (req, res) => {
+    if (req.body) {
+        const { bannerImages, mainImg } = req.files;
+
+        let banner = [];
+        if (bannerImages) {
+            const imgArray = await fileUploadController.Uploads(bannerImages);
+            imgArray.map((src, index) => {
+                banner.push({
+                    filename: bannerImages[index].originalname,
+                    contentType: bannerImages[index].mimetype,
+                    imageBase64: src
+                });
+            });
+
+        }
+
+        let mainImage;
+        if (mainImg) {
+            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
+
+            mainImage = {
+                filename: mainImg[0].originalname,
+                contentType: mainImg[0].mimetype,
+                imageBase64: base64
+            }
+        }
+
+        let param = {
+            bannerContent: req.body.bannerContent,
+            header: req.body.header,
+            body: req.body.body,
+            footer: req.body.footer,
+        }
+
+        if (banner && banner.length > 0) {
+            param['bannerImages'] = banner;
+        }
+
+        if (mainImage) {
+            param['mainImg'] = mainImage;
+        }
+
+
+        const result = await homeModel.updateOne({ _id: req.body.id }, param);
+
+        if (result) {
+            return res.status(constant.OK).json({ success: true, meesage: "Home page Updated successfully" });
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong');
+
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error("Invalid Request");
 });

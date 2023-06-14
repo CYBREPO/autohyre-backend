@@ -6,7 +6,7 @@ const fileUploadController = require('./fileUpload-controller');
 exports.getOurList = asyncHandler(async (req, res) => {
     const result = await ourListModel.findOne().exec();
     if (result) {
-        res.status(constants.OK).json({ success: true, data: result });
+        return res.status(constants.OK).json({ success: true, data: result });
     }
     res.status(constants.VALIDATION_ERROR);
     throw new Error("Not Found");

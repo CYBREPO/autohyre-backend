@@ -43,7 +43,7 @@ exports.getAllLeaders = asyncHandler(async (req, res) => {
 exports.getTeams = asyncHandler(async (req,res) => {
     const teams = await teamsModel.findOne().exec();
     if(teams){
-        res.status(constants.OK).json({success: true, data: teams});
+        return res.status(constants.OK).json({success: true, data: teams});
     }
     res.status(constants.VALIDATION_ERROR);
     throw new Error("Not Found");

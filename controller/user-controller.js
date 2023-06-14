@@ -70,7 +70,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
     });
 
     if (regUser) {
-        res.status(constant.CREATED).json({ id: regUser._id, email: regUser.email });
+        res.status(constant.CREATED).json({ success: true, message: 'Registered Successfully', data : {id: regUser._id, email: regUser.email }});
     }
     else {
         res.status(constant.VALIDATION_ERROR);
