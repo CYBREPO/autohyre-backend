@@ -134,7 +134,6 @@ exports.updateTeams = asyncHandler(async (req, res) => {
 
 
         let leadersArr = [];
-        console.log(leadersProfile);
         leaders.map((item, index) => {
             if(leadersProfile && leadersProfile[index]){
                 leadersArr.push({

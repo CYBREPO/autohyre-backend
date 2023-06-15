@@ -20,7 +20,6 @@ exports.getAllBrands = asyncHandler(async (req, res) => {
     let { pageSize, pageIndex, searchText} = req.body;
     let query = {};
     if (searchText && searchText != "") {
-        console.log('Test')
         query['$text'] = {$search: searchText};
     }
     const totalCount = await brandModel.countDocuments(query);
