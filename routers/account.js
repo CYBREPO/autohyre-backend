@@ -13,4 +13,5 @@ exports.router = router.post('/login', accountController.login)
                         .post('/register', accountController.registerUser)
                         .post('/updateUser',validateToken,store.store.single('profile'),accountController.updateUser)
                         .post('/reset-password', accountController.resetPassword)
-                        .post('/updatePassword',validateToken,accountController.updatePassword);
+                        .post('/updatePassword',validateToken,accountController.updatePassword)
+                        .get('/getCount',accountController.getCount);

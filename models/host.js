@@ -65,6 +65,10 @@ const HostSchema = new mongoose.Schema(
         "listing": {
             type: String,
         },
+        "status": {
+            type: String,
+            default: "Pending"
+        },
         'createdBy': mongoose.Types.ObjectId,
         'modifiedBy': mongoose.Types.ObjectId,
     },

@@ -256,3 +256,15 @@ exports.updateUser = asyncHandler(async (req, res) => {
     res.status(constant.VALIDATION_ERROR);
     throw new Error('Invalid request');
 })
+
+exports.getCount = asyncHandler(async (req, res) => {
+    
+        const totalUser = await userModel.countDocuments();
+
+        const loggedInUser = await userModel.countDocuments({lastLogin: {$ne: null}});
+        if (totalUser) {
+            return res.status(constant.OK).json({ success: true,data: {totalUser: totalUser,loggedInUser: loggedInUser}});
+        }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong');
+})
