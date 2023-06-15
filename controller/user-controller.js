@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { email } = require('./email');
-const fileUploadController = require('../controller/fileUpload-controller');
 const encryptController = require('./encryption');
 
 exports.getUserDetails = asyncHandler(async (req, res) => {
@@ -49,23 +48,12 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-    let profile = {}
-    if (req.file) {
-        const base64 = await fileUploadController.SingleUpload(profile[0]);
-
-        profile = {
-            filename: req.file.originalname,
-            contentType: req.file.mimetype,
-            imageBase64: base64
-        }
-    }
-
     const regUser = await userModel.create({
         name: req.body.name,
         mobile: req.body.mobile,
         email: req.body.email,
         password: hashPassword,
-        profile: profile,
+        profile: req.file.path.split('uploads\\')[1],
         isAdmin: req.body.isAdmin ?? false,
     });
 
@@ -189,7 +177,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
         let info = await email({ mails: req.body.email, email: emailBody });
     }
 
-    res.status(200).json({ message: "success" });
+    res.status(200).json({success: true, message: "Password reset successful" });
 });
 
 exports.updatePassword = asyncHandler(async (req, res) => {
@@ -225,13 +213,8 @@ exports.updateUser = asyncHandler(async (req, res) => {
     if (req.body) {
         let update = {};
         if (req.file) {
-            const base64 = await fileUploadController.SingleUpload(req.file);
 
-            update['profile'] = {
-                filename: req.file.originalname,
-                contentType: req.file.mimetype,
-                imageBase64: base64
-            }
+            update['profile'] = req.file.path.split('uploads\\')[1]
 
         }
         update['name'] = req.body.name;

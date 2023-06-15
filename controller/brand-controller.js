@@ -3,8 +3,6 @@ const model = require('../models/brands');
 const constant = require('../constant/constant').constants;
 const carModel = require('../models/carModel').carModel;
 const asyncHandler = require('express-async-handler');
-// const fs = require('fs');
-const fileUploadController = require('./fileUpload-controller');
 
 let brandModel = model.vehicle_brand;
 
@@ -61,17 +59,8 @@ exports.getAllModels = asyncHandler(async (req, res) => {
 
 exports.setBrands = asyncHandler(async (req, res) => {
     if (req.body) {
-        // let img = fs.readFileSync(req.file.path)
-
-        // let base64 = img.toString('base64');
-        let base64 = await fileUploadController.SingleUpload(req.file);
-
         let finalImg = {
-            image: {
-                filename: req.file.originalname,
-                contentType: req.file.mimetype,
-                imageBase64: base64
-            },
+            image: req.file.path.split('uploads\\')[1],
             name: req.body.name,
             models: [],
             createdBy: req.user._id
@@ -95,12 +84,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
     if (req.body) {
         let update = {};
         if (req.file) {
-            let base64 = await fileUploadController.SingleUpload(req.file);
-            update['image'] = {
-                filename: req.file.originalname,
-                contentType: req.file.mimetype,
-                imageBase64: base64
-            };
+            update['image'] = req.file.path.split('uploads\\')[1];
         }
 
         if (req.body.name != "" && req.body.name != null) {

@@ -16,6 +16,9 @@ const VehicleSchema = new mongoose.Schema(
         "vin": String,
         "price": Number,
         "year": Number,
+        "images": [{
+            type: String
+        }],
         'createdBy': mongoose.Types.ObjectId,
         'modifiedBy': mongoose.Types.ObjectId,
     },

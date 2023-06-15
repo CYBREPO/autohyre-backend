@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const { constants } = require('../constant/constant');
 const ourListModel = require('../models/ourLst').ourLists;
-const fileUploadController = require('./fileUpload-controller');
 
 exports.getOurList = asyncHandler(async (req, res) => {
     const result = await ourListModel.findOne().exec();
@@ -17,28 +16,6 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
         const { features } = req.body;
         const { bannerImg, mainImg } = req.files;
 
-        let banner = {};
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
-
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let mainImage = {};
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
 
         let featuredArr = [];
         features.map((item, index) => {
@@ -50,15 +27,15 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
 
         const result = await ourListModel.create({
             header: req.body.header,
-            bannerImg: banner,
-            mainImg: mainImage,
+            bannerImg: bannerImg[0].path.split('uploads\\')[1],
+            mainImg: mainImg[0].path.split('uploads\\')[1],
             features: featuredArr,
             body: req.body.body,
             footer: req.body.footer,
         });
 
         if (result) {
-            return res.status(constants.OK).json({ success: true, meesage: "our list saved successfully" });
+            return res.status(constants.OK).json({ success: true, message: "our list saved successfully" });
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -74,29 +51,6 @@ exports.updateOurList = asyncHandler(async (req, res) => {
         const { features } = req.body;
         const { bannerImg, mainImg } = req.files;
 
-        let banner;
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
-
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let mainImage;
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
-
         let featuredArr = [];
         features.map((item, index) => {
             featuredArr.push({
@@ -107,23 +61,21 @@ exports.updateOurList = asyncHandler(async (req, res) => {
 
         let param = {
             header: req.body.header,
-            bannerImg: banner,
-            mainImg: mainImage,
             features: featuredArr,
             body: req.body.body,
             footer: req.body.footer
         }
 
-        if (banner)
-            param['bannerImg'] = banner;
+        if (bannerImg)
+            param['bannerImg'] = bannerImg[0].path.split('uploads\\')[1];
 
-        if (mainImage)
-            param['mainImg'] = mainImage;
+        if (mainImg)
+            param['mainImg'] = mainImg[0].path.split('uploads\\')[1];
 
         const result = await ourListModel.updateOne({ _id: req.body.id }, { $set: param });
 
         if (result) {
-            return res.status(constants.OK).json({ success: true, meesage: "our list saved successfully" });
+            return res.status(constants.OK).json({ success: true, message: "our list saved successfully" });
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');

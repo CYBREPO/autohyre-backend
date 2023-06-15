@@ -55,18 +55,18 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
             break;
     }
 
-    let ids = dbVehicle.map(m => m._id);
-    let files = await fileUpload.find({ vehicleId: ids }).exec();
+    // let ids = dbVehicle.map(m => m._id);
+    // let files = await fileUpload.find({ vehicleId: ids }).exec();
 
-    let temp = [];
-    dbVehicle.forEach(m => {
-        temp.push({
-            vehicle: m,
-            images: files.filter(x => x.vehicleId.toString() == m._id.toString())
-        })
-    });
+    // let temp = [];
+    // dbVehicle.forEach(m => {
+    //     temp.push({
+    //         vehicle: m,
+    //         images: files.filter(x => x.vehicleId.toString() == m._id.toString())
+    //     })
+    // });
 
-    return res.status(constant.OK).json({success: true, data: temp});
+    return res.status(constant.OK).json({success: true, data: dbVehicle});
 
 
 });
@@ -96,7 +96,13 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
     // try {
     if (req.body != null) {
 
-        let result = await vehicleModel.create(req.body);
+        const param = req.body;
+
+        if(req.files){
+            param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
+        }
+        
+        let result = await vehicleModel.create(param);
 
         if (result) {
             //save basic details
@@ -124,25 +130,9 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
             features.save();
             const basic = new vehicleDetails(basicparams);
             basic.save();
-            const files = req.files
-            let imgArray = await fileUploads.Uploads(files);
-            let uploadResult = imgArray.map(async (src, index) => {
-
-                // create object to store data in the collection
-                let finalImg = {
-                    filename: files[index].originalname,
-                    contentType: files[index].mimetype,
-                    imageBase64: src,
-                    vehicleId: result._id,
-                }
-
-                let newUpload = await fileUpload.create(finalImg);
-
-
-            });
 
             let message = "Vehicle added save successfully";
-            return res.status(constant.OK).json({ message: message, data: result });
+            return res.status(constant.OK).json({success: true, message: message, data: result });
         }
     }
 

@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const pageModel = require('../models/pages').page;
 const constant = require('../constant/constant').constants;
-const fileUploadController = require('./fileUpload-controller');
 const aboutusModel = require('../models/aboutus').aboutus;
 const homeModel = require('../models/home').home;
 
@@ -36,15 +35,15 @@ exports.savePage = asyncHandler(async (req, res) => {
     if (req.body) {
         let images = [];
         if (req.files) {
-            const arr = await fileUploadController.Uploads(req.files);
+            // const arr = await fileUploadController.Uploads(req.files);
 
-            arr.map((src, index) => {
-                images.push({
-                    filename: req.files[index].originalname,
-                    contentType: req.files[index].mimetype,
-                    imageBase64: src
-                });
-            });
+            // arr.map((src, index) => {
+            //     images.push({
+            //         filename: req.files[index].originalname,
+            //         contentType: req.files[index].mimetype,
+            //         imageBase64: src
+            //     });
+            // });
 
         }
 
@@ -70,15 +69,15 @@ exports.updatePage = asyncHandler(async (req, res) => {
     if (req.body) {
         let images = [];
         if (req.files) {
-            const arr = await fileUploadController.Uploads(req.files);
+            // const arr = await fileUploadController.Uploads(req.files);
 
-            arr.map((src, index) => {
-                images.push({
-                    filename: req.files[index].originalname,
-                    contentType: req.files[index].mimetype,
-                    imageBase64: src
-                });
-            });
+            // arr.map((src, index) => {
+            //     images.push({
+            //         filename: req.files[index].originalname,
+            //         contentType: req.files[index].mimetype,
+            //         imageBase64: src
+            //     });
+            // });
 
         }
 
@@ -113,40 +112,16 @@ exports.saveAboutus = asyncHandler(async (req, res) => {
     if (req.body) {
         const { bannerImg, mainImg } = req.files;
 
-        let banner = {};
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
-
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let mainImage = {};
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
-
-
         const result = await aboutusModel.create({
             header: req.body.header,
-            bannerImg: banner,
-            mainImg: mainImage,
+            bannerImg: bannerImg[0].path.split('uploads\\')[1],
+            mainImg: mainImg[0].path.split('uploads\\')[1],
             body: req.body.body,
             footer: req.body.footer,
         });
 
         if (result) {
-            return res.status(constant.OK).json({ success: true, meesage: "About us saved successfully" });
+            return res.status(constant.OK).json({ success: true, message: "About us saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -161,45 +136,22 @@ exports.updateAboutus = asyncHandler(async (req, res) => {
 
         const { bannerImg, mainImg } = req.files;
 
-        let banner;
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
-
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let mainImage;
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
-
         let param = {
             header: req.body.header,
             body: req.body.body,
             footer: req.body.footer,
         };
 
-        if (banner)
-            param["bannerImg"] = banner
+        if (bannerImg)
+            param["bannerImg"] = bannerImg[0].path.split('uploads\\')[1];
 
-        if (mainImage)
-            param["mainImg"] = mainImage
+        if (mainImg)
+            param["mainImg"] = mainImg[0].path.split('uploads\\')[1];
 
         const result = await aboutusModel.updateOne({ _id: req.body.id }, { $set: param });
 
         if (result) {
-            return res.status(constant.OK).json({ success: true, meesage: "about us saved successfully" });
+            return res.status(constant.OK).json({ success: true, message: "about us saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -222,40 +174,17 @@ exports.saveHome = asyncHandler(async (req, res) => {
     if (req.body) {
         const { bannerImages, mainImg } = req.files;
 
-        let banner = [];
-        if (bannerImages) {
-            const imgArray = await fileUploadController.Uploads(bannerImages);
-            banner.push({
-                filename: bannerImages[index].originalname,
-                contentType: bannerImages[index].mimetype,
-                imageBase64: imgArray[index]
-            });
-
-        }
-
-        let mainImage;
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
-
-
         const result = await homeModel.create({
             bannerContent: req.body.bannerContent,
             header: req.body.header,
-            bannerImages: banner,
-            mainImg: mainImage,
+            bannerImages: bannerImages.map(m => m.path.split('uploads\\')[1]),
+            mainImg: mainImg[0].path.split('uploads\\')[1],
             body: req.body.body,
             footer: req.body.footer,
         });
 
         if (result) {
-            return res.status(constant.OK).json({ success: true, meesage: "Home page saved successfully" });
+            return res.status(constant.OK).json({ success: true, message: "Home page saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -269,30 +198,6 @@ exports.updateHome = asyncHandler(async (req, res) => {
     if (req.body) {
         const { bannerImages, mainImg } = req.files;
 
-        let banner = [];
-        if (bannerImages) {
-            const imgArray = await fileUploadController.Uploads(bannerImages);
-            imgArray.map((src, index) => {
-                banner.push({
-                    filename: bannerImages[index].originalname,
-                    contentType: bannerImages[index].mimetype,
-                    imageBase64: src
-                });
-            });
-
-        }
-
-        let mainImage;
-        if (mainImg) {
-            const base64 = await fileUploadController.SingleUpload(mainImg[0]);
-
-            mainImage = {
-                filename: mainImg[0].originalname,
-                contentType: mainImg[0].mimetype,
-                imageBase64: base64
-            }
-        }
-
         let param = {
             bannerContent: req.body.bannerContent,
             header: req.body.header,
@@ -300,19 +205,19 @@ exports.updateHome = asyncHandler(async (req, res) => {
             footer: req.body.footer,
         }
 
-        if (banner && banner.length > 0) {
-            param['bannerImages'] = banner;
+        if (bannerImages && bannerImages.length > 0) {
+            param['bannerImages'] = bannerImages.map(m => m.path.split('uploads\\')[1]);
         }
 
-        if (mainImage) {
-            param['mainImg'] = mainImage;
+        if (mainImg) {
+            param['mainImg'] = mainImg[0].path.split('uploads\\')[1];
         }
 
 
         const result = await homeModel.updateOne({ _id: req.body.id }, param);
 
         if (result) {
-            return res.status(constant.OK).json({ success: true, meesage: "Home page Updated successfully" });
+            return res.status(constant.OK).json({ success: true, message: "Home page Updated successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');

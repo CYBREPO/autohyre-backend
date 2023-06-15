@@ -14,19 +14,7 @@ const LeardersSchema = mongoose.Schema({
         require: true,
     },
     profile: {
-        filename: {
-            type: String,
-            // unique : true,
-            required: true
-        },
-        contentType: {
-            type: String,
-            required: true
-        },
-        imageBase64: {
-            type: String,
-            required: true
-        },
+        type: String
     },
     'createdBy': mongoose.Types.ObjectId,
     'modifiedBy': mongoose.Types.ObjectId,

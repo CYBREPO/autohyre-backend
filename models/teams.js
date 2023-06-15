@@ -6,19 +6,7 @@ const teamsSchema = mongoose.Schema(
             type: String,
         },
         bannerImg: {
-            filename: {
-                type: String,
-                // unique : true,
-                // required: true
-            },
-            contentType: {
-                type: String,
-                // required: true
-            },
-            imageBase64: {
-                type: String,
-                // required: true
-            }
+            type: String
         },
         leaders: [
             {
@@ -34,19 +22,7 @@ const teamsSchema = mongoose.Schema(
                     type: String,
                 },
                 profile: {
-                    filename: {
-                        type: String,
-                        // unique : true,
-                        // required: true
-                    },
-                    contentType: {
-                        type: String,
-                        // required: true
-                    },
-                    imageBase64: {
-                        type: String,
-                        // required: true
-                    }
+                    type: String
                 }
 
             }

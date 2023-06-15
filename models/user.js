@@ -18,20 +18,8 @@ const UserSchema = new mongoose.Schema(
         required: [true, "Password is required"]
     },
     "profile": {
-      filename: {
-        type: String,
-        unique: true,
-        // required: true
-      },
-      contentType: {
-        type: String,
-        // required: true
-      },
-      imageBase64: {
-        type: String,
-        // required: true
-      }
-    },
+      type: String
+  },
     "isAdmin": {
       type: Boolean,
       required: true

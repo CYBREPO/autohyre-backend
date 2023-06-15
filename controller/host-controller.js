@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const constant = require('../constant/constant').constants;
 const hostModel = require('../models/host').host;
-const fileUploadController = require('./fileUpload-controller');
 const userModel = require('../models/user').user;
 
 exports.createHost = asyncHandler(async (req,res )=>{
@@ -18,31 +17,8 @@ exports.createHost = asyncHandler(async (req,res )=>{
         throw new Error("Host already exist");
     }
 
-    let profileBase = {};
     let {profile, carPhotos} = req.files;
-    if(profile){
-        const base64 = await fileUploadController.SingleUpload(profile[0]);
-
-        profileBase =  {
-            filename: profile[0].originalname,
-            contentType: profile[0].mimetype,
-            imageBase64: base64,
-        }
-    }
-
-    let carPhotoBase = []
-    if(carPhotos){
-        const imgArray = await fileUploadController.Uploads(carPhotos);
-        let uploadImage = imgArray.map(async (src, index) => {
-
-            // create object to store data in the collection
-            carPhotoBase.push({
-                filename: carPhotos[index].originalname,
-                contentType: carPhotos[index].mimetype,
-                imageBase64: src,
-            });
-        });
-    }
+   
 
     const host = await hostModel.create({
         car: req.body.car,
@@ -54,13 +30,17 @@ exports.createHost = asyncHandler(async (req,res )=>{
         drivingLicense: req.body.drivingLicense,
         goals: req.body.goals,
         payout: req.body.payout,
-        profile: profileBase,
-        carPhotos: carPhotoBase,
+        profile: profile[0].path.split('uploads\\')[1],
+        carPhotos: carPhotos.map(m => m.path.split('uploads\\')[1]),
         createdBy: req.user._id,
         status:"Pending"
     });
 
-    res.status(constant.CREATED).json({success: true, message: "success"});
+    if(host)
+        return res.status(constant.CREATED).json({success: true, message: "Host saved successfully"});
+
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Something went wrong')
 });
 
 exports.getHost = asyncHandler(async (req,res) => {

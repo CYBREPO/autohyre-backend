@@ -7,19 +7,7 @@ const HostSchema = new mongoose.Schema(
             required: [true, "Name is required"]
         },
         "profile": {
-            filename: {
-                type: String,
-                unique: true,
-                required: true
-            },
-            contentType: {
-                type: String,
-                required: true
-            },
-            imageBase64: {
-                type: String,
-                required: true
-            }
+            type: String
         },
         "mobile": {
             type: String,
@@ -40,19 +28,7 @@ const HostSchema = new mongoose.Schema(
         },
         "carPhotos": [
             {
-                filename: {
-                    type: String,
-                    unique: true,
-                    required: true
-                },
-                contentType: {
-                    type: String,
-                    required: true
-                },
-                imageBase64: {
-                    type: String,
-                    required: true
-                }
+                type: String
             }
 
         ],

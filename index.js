@@ -14,7 +14,7 @@ server.use(cors({
 }));
 
 server.use(express.json());
-server.use(express.static(path.join(__dirname, 'public')));
+server.use(express.static(path.join(__dirname, 'uploads')));
 server.use(errorHandler);
 
 //database connect

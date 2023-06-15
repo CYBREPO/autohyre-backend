@@ -2,18 +2,17 @@ const asyncHandler = require('express-async-handler');
 const { constants } = require('../constant/constant');
 const { leader } = require('../models/leaders');
 const teamsModel = require('../models/teams').teams;
-const fileUploadController = require('./fileUpload-controller');
 
 exports.saveLeaders = asyncHandler(async (req, res) => {
     if (req.body) {
         let profile = {}
         if (req.file) {
-            const base64 = await fileUploadController.SingleUpload(req.file);
-            profile = {
-                filename: req.file.originalname,
-                contentType: req.file.mimetype,
-                imageBase64: base64
-            }
+            // const base64 = await fileUploadController.SingleUpload(req.file);
+            // profile = {
+            //     filename: req.file.originalname,
+            //     contentType: req.file.mimetype,
+            //     imageBase64: base64
+            // }
         }
 
         const result = await leader.create({
@@ -54,36 +53,21 @@ exports.saveTeams = asyncHandler(async (req, res) => {
         const {leaders, boardOfDirectors} = req.body;
         const { bannerImg, leadersProfile, boardsProfile } = req.files;
 
-        let banner = {};
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
-
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let imgArray;
-        if (leadersProfile) {
-            imgArray = await fileUploadController.Uploads(leadersProfile);
-        }
+  
         let leadersArr = [];
         leaders.map((item, index) => {
-            let file = {};
+            // let file = {};
             if(leadersProfile && leadersProfile[index]){
-                file = {
-                    filename: leadersProfile[index].originalname,
-                    contentType: leadersProfile[index].mimetype,
-                    imageBase64: imgArray[index]
-                }
+                // file = {
+                //     filename: leadersProfile[index].originalname,
+                //     contentType: leadersProfile[index].mimetype,
+                //     imageBase64: imgArray[index]
+                // }
                 leadersArr.push({
                     name: item.name,
                     designation: item.designation,
                     description: item.description,
-                    profile: file
+                    profile: leadersProfile[index].path.split('uploads\\')[1]
                 })
             }
             else{
@@ -95,25 +79,21 @@ exports.saveTeams = asyncHandler(async (req, res) => {
             }
             
         });
-        imgArray = [];
-        if (boardsProfile) {
-            imgArray = await fileUploadController.Uploads(boardsProfile);
-        }
         let boardArr = [];
         boardOfDirectors.map((item, index) => {
-            let file = {}; 
+            // let file = {}; 
             
             if(boardsProfile && boardsProfile[index]){
-                file = {
-                    filename: boardsProfile[index].originalname,
-                    contentType: boardsProfile[index].mimetype,
-                    imageBase64: imgArray[index]
-                }
+                // file = {
+                //     filename: boardsProfile[index].originalname,
+                //     contentType: boardsProfile[index].mimetype,
+                //     imageBase64: imgArray[index]
+                // }
                 boardArr.push({
                     name: item.name,
                     designation: item.designation,
                     description: item.description,
-                    profile: file
+                    profile: boardsProfile[index].path.split('uploads\\')[1]
                 });
             }
             else{
@@ -129,13 +109,13 @@ exports.saveTeams = asyncHandler(async (req, res) => {
 
         const teams = await teamsModel.create({
             header: req.body.header,
-            bannerImg: banner,
+            bannerImg: bannerImg[0].path.split('uploads\\')[1],
             leaders: leadersArr,
             boardOfDirectors: boardArr
         });
 
         if(teams){
-            return res.status(constants.OK).json({success: true, message: "teams saved successfully"});
+            return res.status(constants.OK).json({success: true, message: "Teams saved successfully"});
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -152,41 +132,20 @@ exports.updateTeams = asyncHandler(async (req, res) => {
 
         const dbTeam = await teamsModel.findById(req.body.id);
 
-        let banner;
-        if (bannerImg) {
-            const base64 = await fileUploadController.SingleUpload(bannerImg[0]);
 
-            banner = {
-                filename: bannerImg[0].originalname,
-                contentType: bannerImg[0].mimetype,
-                imageBase64: base64
-            }
-
-        }
-
-        let imgArray;
-        if (leadersProfile) {
-            imgArray = await fileUploadController.Uploads(leadersProfile);
-        }
         let leadersArr = [];
+        console.log(leadersProfile);
         leaders.map((item, index) => {
-            let file = {};
             if(leadersProfile && leadersProfile[index]){
-                file = {
-                    filename: leadersProfile[index].originalname,
-                    contentType: leadersProfile[index].mimetype,
-                    imageBase64: imgArray[index]
-                }
                 leadersArr.push({
                     name: item.name,
                     designation: item.designation,
                     description: item.description,
-                    profile: file
+                    profile: leadersProfile[index].path.split('uploads\\')[1]
                 });
             }
             else{
                 const file = dbTeam?.leaders.find(m => m._id.toString() == item.id);
-                console.log(file)
                 leadersArr.push({
                     name: item.name,
                     designation: item.designation,
@@ -196,25 +155,16 @@ exports.updateTeams = asyncHandler(async (req, res) => {
             }
         });
         
-        imgArray = [];
-        if (boardsProfile) {
-            imgArray = await fileUploadController.Uploads(boardsProfile);
-        }
         let boardArr = [];
         boardOfDirectors.map((item, index) => {
-            let file = {}; 
             
             if(boardsProfile && boardsProfile[index]){
-                file = {
-                    filename: boardsProfile[index].originalname,
-                    contentType: boardsProfile[index].mimetype,
-                    imageBase64: imgArray[index]
-                }
+
                 boardArr.push({
                     name: item.name,
                     designation: item.designation,
                     description: item.description,
-                    profile: file
+                    profile: boardsProfile[index].path.split('uploads\\')[1]
                 });
             }
             else{
@@ -233,8 +183,8 @@ exports.updateTeams = asyncHandler(async (req, res) => {
             boardOfDirectors: boardArr
         }
 
-        if(banner){
-            param["bannerImg"] =  banner
+        if(bannerImg){
+            param["bannerImg"] =  bannerImg[0].path.split('uploads\\')[1];
         }
 
         // console.log(param)
@@ -242,7 +192,7 @@ exports.updateTeams = asyncHandler(async (req, res) => {
         const teams = await teamsModel.updateOne({_id:req.body.id}, {$set:param});
 
         if(teams){
-           return res.status(constants.OK).json({success: true, meesage: "teams saved successfully"});
+           return res.status(constants.OK).json({success: true, message: "Teams saved successfully"});
         }
         res.status(constants.VALIDATION_ERROR);
         throw new Error('Something went wrong');
