@@ -1,43 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { constants } = require('../constant/constant');
-const { leader } = require('../models/leaders');
 const teamsModel = require('../models/teams').teams;
 
-exports.saveLeaders = asyncHandler(async (req, res) => {
-    if (req.body) {
-        let profile = {}
-        if (req.file) {
-            // const base64 = await fileUploadController.SingleUpload(req.file);
-            // profile = {
-            //     filename: req.file.originalname,
-            //     contentType: req.file.mimetype,
-            //     imageBase64: base64
-            // }
-        }
-
-        const result = await leader.create({
-            name: req.body.name,
-            designation: req.body.designation,
-            bio: req.body.bio,
-            profile: profile
-        });
-
-        res.status(constants.OK).json({
-            success: true, message: "data save successfully", data: {
-                name: result.name,
-                id: result._id,
-            }
-        });
-    }
-    res.status(constants.VALIDATION_ERROR);
-    throw new Error('Invalid request');
-});
-
-exports.getAllLeaders = asyncHandler(async (req, res) => {
-    const result = await leader.find({}).exec();
-
-    res.status(constants.OK).json({ success: true, data: result });
-});
 
 exports.getTeams = asyncHandler(async (req,res) => {
     const teams = await teamsModel.findOne().exec();
@@ -56,13 +20,7 @@ exports.saveTeams = asyncHandler(async (req, res) => {
   
         let leadersArr = [];
         leaders.map((item, index) => {
-            // let file = {};
             if(leadersProfile && leadersProfile[index]){
-                // file = {
-                //     filename: leadersProfile[index].originalname,
-                //     contentType: leadersProfile[index].mimetype,
-                //     imageBase64: imgArray[index]
-                // }
                 leadersArr.push({
                     name: item.name,
                     designation: item.designation,
@@ -81,14 +39,8 @@ exports.saveTeams = asyncHandler(async (req, res) => {
         });
         let boardArr = [];
         boardOfDirectors.map((item, index) => {
-            // let file = {}; 
             
             if(boardsProfile && boardsProfile[index]){
-                // file = {
-                //     filename: boardsProfile[index].originalname,
-                //     contentType: boardsProfile[index].mimetype,
-                //     imageBase64: imgArray[index]
-                // }
                 boardArr.push({
                     name: item.name,
                     designation: item.designation,
@@ -185,8 +137,6 @@ exports.updateTeams = asyncHandler(async (req, res) => {
         if(bannerImg){
             param["bannerImg"] =  bannerImg[0].path.split('uploads\\')[1];
         }
-
-        // console.log(param)
 
         const teams = await teamsModel.updateOne({_id:req.body.id}, {$set:param});
 

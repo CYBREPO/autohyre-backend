@@ -55,24 +55,12 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
             break;
     }
 
-    // let ids = dbVehicle.map(m => m._id);
-    // let files = await fileUpload.find({ vehicleId: ids }).exec();
-
-    // let temp = [];
-    // dbVehicle.forEach(m => {
-    //     temp.push({
-    //         vehicle: m,
-    //         images: files.filter(x => x.vehicleId.toString() == m._id.toString())
-    //     })
-    // });
-
-    return res.status(constant.OK).json({success: true, data: dbVehicle});
+    return res.status(constant.OK).json({ success: true, data: dbVehicle });
 
 
 });
 
 exports.getAdditionDetails = asyncHandler(async (req, res) => {
-    // try {
     if (req.query.id) {
         let basic = await vehicleDetails.findOne({ vehicleId: req.query.id });
 
@@ -98,10 +86,10 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
 
         const param = req.body;
 
-        if(req.files){
+        if (req.files) {
             param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
         }
-        
+
         let result = await vehicleModel.create(param);
 
         if (result) {
@@ -122,6 +110,7 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
                 "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
                 "description": req.body.description,
                 "vehicleId": result._id,
+                "location": req.body.location,
             }
 
             let requestBody = req.body;
@@ -132,21 +121,21 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
             basic.save();
 
             let message = "Vehicle added save successfully";
-            return res.status(constant.OK).json({success: true, message: message, data: result });
+            return res.status(constant.OK).json({ success: true, message: message, data: result });
         }
     }
 
 });
 
 exports.deleteVehicle = asyncHandler(async (req, res) => {
-    if(req.query.id){
+    if (req.query.id) {
         let veh = await vehicleModel.findByIdAndDelete(req.query.id);
-        if(veh){
-            await vehicleDetails.findOne({vehicleId: req.query.id});
-            await vehicleFeature.findOne({vehicleId: req.query.id});
-            await fileUpload.find({vehicleId: req.query.id});
+        if (veh) {
+            await vehicleDetails.findOne({ vehicleId: req.query.id });
+            await vehicleFeature.findOne({ vehicleId: req.query.id });
+            await fileUpload.find({ vehicleId: req.query.id });
 
-            res.status(constant.OK).json({success: true, message: "Deleted successfully"});
+            res.status(constant.OK).json({ success: true, message: "Deleted successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');
@@ -158,14 +147,31 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
 //update vehile details
 exports.updateVehicleDetails = asyncHandler(async (req, res) => {
     if (req.body != null) {
-        const vehicle = new vehicleModel(req.body);
-        vehicle.save((err, doc) => {
-            if (err) {
-                return res.status(constant.VALIDATION_ERROR).json({ errorMessage: err.message });
-            }
-            let message = "Vehicle added save successfully";
-            return res.status(constant.OK).json({ message: message, data: doc });
-        });
+        let basicparams = {
+            "averageFuelEconomy": req.body.averageFuelEconomy,
+            "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
+            "cityFuelEconomy": req.body.cityFuelEconomy,
+            "fuelGrade": req.body.fuelGrade,
+            "fuelType": req.body.fuelType,
+            "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
+            "fuelUnit": req.body.fuelUnit,
+            "fuelUnitLabel": req.body.fuelUnitLabel,
+            "highwayFuelEconomy": req.body.highwayFuelEconomy,
+            "numberOfDoors": req.body.numberOfDoors,
+            "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
+            "numberOfSeats": req.body.numberOfSeats,
+            "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
+            "description": req.body.description,
+            "vehicleId": result._id,
+            "location": req.body.location,
+        }
+        const vehicle = new vehicleModel.updateOne({ _id: req.body.id }, { $set: basicparams });
+        if (vehicle) {
+            let message = "Vehicle updated save successfully";
+            return res.status(constant.OK).json({success: true, message: message, data: vehicle });
+        }
+        return res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong')
     }
 });
 

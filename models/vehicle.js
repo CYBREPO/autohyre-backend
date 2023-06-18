@@ -19,6 +19,21 @@ const VehicleSchema = new mongoose.Schema(
         "images": [{
             type: String
         }],
+        "location": [{
+            "address": String,
+            "addressLines": [String],
+            "city": String,
+            "country": String,
+            "latitude": Number,
+            "locationSource": String,
+            "longitude": Number,
+            "precision": {
+                "accuracy": Number,
+                "level": String
+            },
+            "state": String,
+            "timeZone": String
+        }],
         'createdBy': mongoose.Types.ObjectId,
         'modifiedBy': mongoose.Types.ObjectId,
     },
@@ -28,5 +43,5 @@ const VehicleSchema = new mongoose.Schema(
     }
 );
 
-VehicleSchema.index({"make": 'text',"model": 'text',"year": 'text'});
+VehicleSchema.index({ "make": 'text', "model": 'text', "year": 'text' });
 exports.vehicle = mongoose.model("vehicle", VehicleSchema);

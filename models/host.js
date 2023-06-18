@@ -2,28 +2,53 @@ const mongoose = require('mongoose');
 
 const HostSchema = new mongoose.Schema(
     {
-        "car": {
+        "make": {
             type: String,
-            required: [true, "Name is required"]
+            required: [true, "Make is required"]
         },
-        "profile": {
+        "model": {
+            type: String,
+            required: [true, "Model is required"]
+        },
+        "year": {
+            type: String,
+            required: [true, "Year is required"]
+        },
+        "vin": {
+            type: String,
+            required: [true, "VIN is required"]
+        },
+        "ownerName": {
+
+        },
+        "ownerProfile": {
             type: String
         },
-        "mobile": {
+        "ownerMobile": {
             type: String,
             // required: [true, "Email is required"]
         },
-        "drivingLicense": {
-            type: String,
-            // required: [true, "Password is required"]
+        // "isSameAsOnwer":{
+        //     type: Boolean
+        // },
+        "dirverDetails": {
+            "drivingLicense": {
+                type: String,
+            },
+            "driverName": {
+                type: String,
+            },
+            "driverMobile": {
+                type: String,
+            },
+            "driverProfile": {
+                type: String,
+            }
         },
         "goals": {
             type: String,
         },
         "carAvailability": {
-            type: String,
-        },
-        "carDetail": {
             type: String,
         },
         "carPhotos": [
@@ -33,12 +58,29 @@ const HostSchema = new mongoose.Schema(
 
         ],
         "payout": {
-            type: String,
+            "bankName": {
+                type: String
+            },
+            "accountName": {
+                type: String
+            },
+            "accountNumber": {
+                type: String
+            }
+        },
+        "airBags": {
+            type: Boolean
+        },
+        "fireExtinguisher": {
+            type: Boolean
+        },
+        "cCaution": {
+            type: Boolean
+        },
+        "umbrella": {
+            type: Boolean
         },
         "safetyQuantity": {
-            type: String,
-        },
-        "listing": {
             type: String,
         },
         "status": {

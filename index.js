@@ -13,7 +13,7 @@ server.use(cors({
     origin: '*'
 }));
 
-server.use(express.json());
+server.use(express.json({limit: '64mb'}));
 server.use(express.static(path.join(__dirname, 'uploads')));
 server.use(errorHandler);
 

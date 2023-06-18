@@ -40,19 +40,7 @@ const teamsSchema = mongoose.Schema(
                 type: String,
             },
             profile: {
-                filename: {
-                    type: String,
-                    // unique : true,
-                    // required: true
-                },
-                contentType: {
-                    type: String,
-                    // required: true
-                },
-                imageBase64: {
-                    type: String,
-                    // required: true
-                }
+                type: String
             }
 
         }],
@@ -66,4 +54,4 @@ const teamsSchema = mongoose.Schema(
     }
 );
 
-exports.teams = mongoose.model('team',teamsSchema);
+exports.teams = mongoose.model('team', teamsSchema);
