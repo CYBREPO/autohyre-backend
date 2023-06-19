@@ -6,6 +6,7 @@ const server = express();
 const path = require('path');
 const { errorHandler } = require('./middleware/errorHandler');
 const port = process.env.PORT;
+var bodyParser = require('body-parser')
 
 //middleware
 server.use(cors({
@@ -13,7 +14,15 @@ server.use(cors({
     origin: '*'
 }));
 
-server.use(express.json({limit: '64mb'}));
+server.use(
+    bodyParser.urlencoded({
+        extended: true,
+        limit: "64mb",
+        parameterLimit: 640000
+    })
+)
+
+server.use(express.json({ limit: '64mb' }));
 server.use(express.static(path.join(__dirname, 'uploads')));
 server.use(errorHandler);
 
@@ -32,5 +41,5 @@ server.use('/api/pages', require('./routers/page-router').router);
 
 //port
 server.listen((port), () => {
-    console.log("Start on port",port);
+    console.log("Start on port", port);
 });
