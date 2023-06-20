@@ -3,6 +3,7 @@ const pageModel = require('../models/pages').page;
 const constant = require('../constant/constant').constants;
 const aboutusModel = require('../models/aboutus').aboutus;
 const homeModel = require('../models/home').home;
+const fileUploadController = require('./fileUpload-controller');
 
 
 exports.getPages = asyncHandler(async (req, res) => {
@@ -151,6 +152,15 @@ exports.updateAboutus = asyncHandler(async (req, res) => {
         const result = await aboutusModel.updateOne({ _id: req.body.id }, { $set: param });
 
         if (result) {
+            let imgs = [];
+            if(result.bannerImg && bannerImg)
+                imgs.push(result.bannerImg);
+
+            if(result.mainImg && mainImg)
+                imgs.push(result.mainImg);
+            
+            if(imgs && imgs.length > 0)
+                fileUploadController.removeFiles(imgs);
             return res.status(constant.OK).json({ success: true, message: "about us saved successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
@@ -217,6 +227,16 @@ exports.updateHome = asyncHandler(async (req, res) => {
         const result = await homeModel.updateOne({ _id: req.body.id }, param);
 
         if (result) {
+            let imgs = [];
+            if(result.bannerImages && bannerImages && bannerImages.length > 0)
+                imgs.push(...result.bannerImages);
+
+            if(result.mainImg && mainImg)
+                imgs.push(result.mainImg);
+            
+            if(imgs && imgs.length > 0)
+                fileUploadController.removeFiles(imgs);
+
             return res.status(constant.OK).json({ success: true, message: "Home page Updated successfully" });
         }
         res.status(constant.VALIDATION_ERROR);

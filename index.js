@@ -17,12 +17,12 @@ server.use(cors({
 server.use(
     bodyParser.urlencoded({
         extended: true,
-        limit: "64mb",
-        parameterLimit: 640000
+        limit: "1024mb",
+        parameterLimit: 10240000
     })
 )
 
-server.use(express.json({ limit: '64mb' }));
+server.use(express.json());
 server.use(express.static(path.join(__dirname, 'uploads')));
 server.use(errorHandler);
 

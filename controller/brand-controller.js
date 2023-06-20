@@ -3,6 +3,7 @@ const model = require('../models/brands');
 const constant = require('../constant/constant').constants;
 const carModel = require('../models/carModel').carModel;
 const asyncHandler = require('express-async-handler');
+const fileUploadController = require('./fileUpload-controller');
 
 let brandModel = model.vehicle_brand;
 
@@ -17,10 +18,10 @@ exports.getBrandById = asyncHandler(async (req, res) => {
 });
 
 exports.getAllBrands = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex, searchText} = req.body;
+    let { pageSize, pageIndex, searchText } = req.body;
     let query = {};
     if (searchText && searchText != "") {
-        query['$text'] = {$search: searchText};
+        query['$text'] = { $search: searchText };
     }
     const totalCount = await brandModel.countDocuments(query);
     if (totalCount > pageSize && pageSize > 0) {
@@ -33,10 +34,10 @@ exports.getAllBrands = asyncHandler(async (req, res) => {
 });
 
 exports.getAllModels = asyncHandler(async (req, res) => {
-    let { pageSize, pageIndex, searchText} = req.body;
+    let { pageSize, pageIndex, searchText } = req.body;
     let query = {};
     if (searchText && searchText != "") {
-        query['$text'] = {$search: searchText};
+        query['$text'] = { $search: searchText };
     }
     const totalCount = await carModel.countDocuments(query);
     if (pageSize) {
@@ -44,12 +45,12 @@ exports.getAllModels = asyncHandler(async (req, res) => {
         let result = await carModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
         let ids = result.map(m => m._id);
         const brands = await brandModel.find({ models: { $in: ids } }).exec();
-    
-        result.forEach(m => {
-            let b = brands.find(x => (x.models?.length??0) > 0 ?  x.models.toString().includes(m._id.toString()) : false);
 
-            data.push({_id: m._id.toString(),name: m.name,carCompany : b?.name??"",carCompanyId: b?._id??""})
-  
+        result.forEach(m => {
+            let b = brands.find(x => (x.models?.length ?? 0) > 0 ? x.models.toString().includes(m._id.toString()) : false);
+
+            data.push({ _id: m._id.toString(), name: m.name, carCompany: b?.name ?? "", carCompanyId: b?._id ?? "" })
+
         });
         return res.status(constant.OK).json({ success: true, data: data, count: totalCount });
     }
@@ -92,9 +93,12 @@ exports.updateBrand = asyncHandler(async (req, res) => {
 
         update['modifiedBy'] = req.user._id;
 
-        let result = await brandModel.findByIdAndUpdate(req.body.id, update, { new: true });
+        let result = await brandModel.findByIdAndUpdate(req.body.id, update);
 
         if (result) {
+            if (result.image && req.file) {
+                fileUploadController.removeFiles([result.image]);
+            }
             return res.status(constant.OK).json({ success: true, message: "data updated successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
@@ -110,6 +114,7 @@ exports.deleteBrand = asyncHandler(async (req, res) => {
         let del = await brandModel.findByIdAndDelete(req.body.id);
 
         if (del) {
+            fileUploadController.removeFiles([del.image]);
             //deleting models linked to the brand
             result = await carModel.deleteMany({ _id: { $in: del.models } });
 
@@ -163,12 +168,12 @@ exports.saveModel = asyncHandler(async (req, res) => {
 
         let result;
 
-        result = await carModel.create({name: req.body.name, createdBy: req.user._id});
+        result = await carModel.create({ name: req.body.name, createdBy: req.user._id });
 
         if (result) {
             const b = await brandModel.findByIdAndUpdate(req.body.brandId, { $push: { models: result._id } });
-            
-            return res.status(constant.OK).json({ success: true, message: "Success" });
+
+            return res.status(constant.OK).json({ success: true, message: "Model Save Successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error("Error occured");
@@ -183,10 +188,10 @@ exports.updateModel = asyncHandler(async (req, res) => {
 
         let result;
 
-        result = await carModel.findByIdAndUpdate(req.body.id, {name: req.body.name, modifiedBy: req.user._id}).exec();
+        result = await carModel.findByIdAndUpdate(req.body.id, { name: req.body.name, modifiedBy: req.user._id }).exec();
 
         if (result) {
-            return res.status(constant.OK).json({ success: true, message: "Success" });
+            return res.status(constant.OK).json({ success: true, message: "Model Update Successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error("Error occured");
@@ -196,14 +201,15 @@ exports.updateModel = asyncHandler(async (req, res) => {
 
 });
 
-exports.deleteModel = asyncHandler(async (req,res) => {
-    if(req.query.id){
+exports.deleteModel = asyncHandler(async (req, res) => {
+    if (req.query.id) {
         let models = await carModel.findByIdAndDelete(req.query.id).exec();
 
-        if(models){
-            await brandModel.findOneAndUpdate({$pull : { models: {$in: models._id }}});
+        if (models) {
 
-            return res.status(constant.OK).json({ success: true, message: "Success" });
+            await brandModel.findOneAndUpdate({ models: { $in: models._id } },{ $pull: { models: models._id  } });
+
+            return res.status(constant.OK).json({ success: true, message: "Model Deleted Successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error("Error occured");

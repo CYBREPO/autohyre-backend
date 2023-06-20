@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { email } = require('./email');
 const encryptController = require('./encryption');
+const fileUploadController = require('./fileUpload-controller');
 
 exports.getUserDetails = asyncHandler(async (req, res) => {
     let id = req.query.id;
@@ -58,7 +59,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
     });
 
     if (regUser) {
-        res.status(constant.CREATED).json({ success: true, message: 'Registered Successfully', data : {id: regUser._id, email: regUser.email }});
+        res.status(constant.CREATED).json({ success: true, message: 'Registered Successfully', data: { id: regUser._id, email: regUser.email } });
     }
     else {
         res.status(constant.VALIDATION_ERROR);
@@ -84,12 +85,13 @@ exports.updateUserStatus = asyncHandler(async (req, res) => {
 exports.deleteUser = asyncHandler(async (req, res) => {
     if (req.query.id) {
         const user = await userModel.findByIdAndDelete(req.query.id);
-        if (user)
-            res.status(constant.OK).json({ success: true, message: "User has been deleted" });
-        else {
-            res.status(constant.VALIDATION_ERROR);
-            throw new Error('User not deleted');
+        if (user) {
+            if(user.profile)
+                fileUploadController.removeFiles([user.profile]);
+            return res.status(constant.OK).json({ success: true, message: "User has been deleted" });
         }
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('User not deleted');
     }
     res.status(constant.VALIDATION_ERROR);
     throw new Error('Invalid request');
@@ -177,7 +179,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
         let info = await email({ mails: req.body.email, email: emailBody });
     }
 
-    res.status(200).json({success: true, message: "Password reset successful" });
+    res.status(200).json({ success: true, message: "Password reset successful" });
 });
 
 exports.updatePassword = asyncHandler(async (req, res) => {
@@ -213,6 +215,9 @@ exports.updateUser = asyncHandler(async (req, res) => {
     if (req.body) {
         let update = {};
         if (req.file) {
+            // const usrP = await userModel.findById(req.body.id);
+            // if (usrP && usrP.profile)
+            //     fileUploadController.removeFiles([usrP.profile]);
 
             update['profile'] = req.file.path.split('uploads\\')[1]
 
@@ -221,17 +226,19 @@ exports.updateUser = asyncHandler(async (req, res) => {
         update['email'] = req.body.email;
         let user;
         if (req.body.id && req.body.id != "") {
-            user = await userModel.findByIdAndUpdate(req.body.id, update, { upsert: true }).exec();
+            user = await userModel.findByIdAndUpdate(req.body.id, update).exec();
+            if(user && user.profile && req.file)
+                fileUploadController.removeFiles([user.profile]);
         }
         else {
-            update['password'] =  await bcrypt.hash('Pass@123', 10);
+            update['password'] = await bcrypt.hash('Pass@123', 10);
             update['isAdmin'] = false
             user = await userModel.create(update);
         }
 
 
         if (user) {
-            return res.status(constant.OK).json({ success: true, message: 'User Details Saved successfully' ,data: user});
+            return res.status(constant.OK).json({ success: true, message: 'User Details Saved successfully', data: user });
         }
         // res.status(constant.VALIDATION_ERROR);
         // throw new Error('user does not exists');
@@ -241,13 +248,13 @@ exports.updateUser = asyncHandler(async (req, res) => {
 })
 
 exports.getCount = asyncHandler(async (req, res) => {
-    
-        const totalUser = await userModel.countDocuments();
 
-        const loggedInUser = await userModel.countDocuments({lastLogin: {$ne: null}});
-        if (totalUser) {
-            return res.status(constant.OK).json({ success: true,data: {totalUser: totalUser,loggedInUser: loggedInUser}});
-        }
-        res.status(constant.VALIDATION_ERROR);
-        throw new Error('Something went wrong');
+    const totalUser = await userModel.countDocuments();
+
+    const loggedInUser = await userModel.countDocuments({ lastLogin: { $ne: null } });
+    if (totalUser) {
+        return res.status(constant.OK).json({ success: true, data: { totalUser: totalUser, loggedInUser: loggedInUser } });
+    }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Something went wrong');
 })

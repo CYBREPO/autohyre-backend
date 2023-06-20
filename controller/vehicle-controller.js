@@ -134,8 +134,9 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
             await vehicleDetails.findOne({ vehicleId: req.query.id });
             await vehicleFeature.findOne({ vehicleId: req.query.id });
             await fileUpload.find({ vehicleId: req.query.id });
+            fileUploads.removeFiles(veh.images);
 
-            res.status(constant.OK).json({ success: true, message: "Deleted successfully" });
+            return res.status(constant.OK).json({ success: true, message: "Deleted successfully" });
         }
         res.status(constant.VALIDATION_ERROR);
         throw new Error('Something went wrong');

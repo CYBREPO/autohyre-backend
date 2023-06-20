@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { constants } = require('../constant/constant');
 const ourListModel = require('../models/ourLst').ourLists;
+const fileUploadController = require('./fileUpload-controller');
 
 exports.getOurList = asyncHandler(async (req, res) => {
     const result = await ourListModel.findOne().exec();
@@ -66,7 +67,7 @@ exports.updateOurList = asyncHandler(async (req, res) => {
             footer: req.body.footer
         }
 
-        if (bannerImg)
+        if (bannerImg){}
             param['bannerImg'] = bannerImg[0].path.split('uploads\\')[1];
 
         if (mainImg)
@@ -75,6 +76,16 @@ exports.updateOurList = asyncHandler(async (req, res) => {
         const result = await ourListModel.updateOne({ _id: req.body.id }, { $set: param });
 
         if (result) {
+            let imgs = [];
+            if(result.bannerImg && bannerImg)
+                imgs.push(result.bannerImg);
+
+            if(result.mainImg && mainImg)
+                imgs.push(result.mainImg);
+            
+            if(imgs && imgs.length > 0)
+                fileUploadController.removeFiles(imgs);
+
             return res.status(constants.OK).json({ success: true, message: "our list saved successfully" });
         }
         res.status(constants.VALIDATION_ERROR);

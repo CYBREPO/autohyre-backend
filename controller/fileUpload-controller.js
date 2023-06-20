@@ -16,7 +16,7 @@ exports.Uploads = async (files) => {
             return img.toString('base64')
         })
 
-        
+
         return imgArray
     }
     catch (ex) {
@@ -46,3 +46,17 @@ exports.SingleUpload = async (file) => {
     }
 
 };
+
+exports.removeFiles = async (filePaths) => {
+
+    try {
+        filePaths.forEach(filePath => {
+            const pathToFile = "uploads\\" + filePath;
+            fs.unlinkSync(pathToFile);
+        });
+        console.log("Successfully deleted the file.");
+
+    } catch (err) {
+        console.log("err",err.message);
+    }
+}

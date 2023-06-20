@@ -8,42 +8,8 @@ const teamsSchema = mongoose.Schema(
         bannerImg: {
             type: String
         },
-        leaders: [
-            {
-                name: {
-                    type: String,
-                    require: true
-                },
-                designation: {
-                    type: String,
-                    require: true
-                },
-                description: {
-                    type: String,
-                },
-                profile: {
-                    type: String
-                }
-
-            }
-        ],
-        boardOfDirectors: [{
-            name: {
-                type: String,
-                require: true
-            },
-            designation: {
-                type: String,
-                require: true
-            },
-            description: {
-                type: String,
-            },
-            profile: {
-                type: String
-            }
-
-        }],
+        leaders: [{ type: mongoose.Types.ObjectId, ref: 'teamsMember'}],
+        boardOfDirectors: [{ type: mongoose.Types.ObjectId, ref: 'teamsMember'}],
         isActive: {
             type: Boolean,
             default: true,
