@@ -211,6 +211,7 @@ exports.sendMail = asyncHandler(async (req, res) => {
                         pickupDate: req.body.pickupDate,
                         drop: req.body.dropLocation?.address,
                         dropDate: req.body.dropLocation?.address,
+                        information: req.body.information
 
                     }]
                 },
