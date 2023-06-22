@@ -17,9 +17,16 @@ exports.createHost = asyncHandler(async (req, res) => {
         throw new Error("Host already exist");
     }
 
-    let { profile, carPhotos } = req.files;
+    let { ownerProfile, carPhotos,driverProfile } = req.files;
 
-
+    let driverDetails = {
+        driverName : req.body.driverName,
+        drivingLicense : req.body.drivingLicense,
+        driverProfile : req.body.sameDriver ? ownerProfile[0].path.split('uploads\\')[1] : 
+        driverProfile[0].path.split('uploads\\')[1],
+        driverMobile : req.body.driverMobile,
+    }
+    
     const host = await hostModel.create({
         make: req.body.make,
         model: req.body.model,
@@ -37,8 +44,8 @@ exports.createHost = asyncHandler(async (req, res) => {
         fireExtinguisher: req.body.fireExtinguisher,
         cCaution: req.body.cCaution,
         umbrella: req.body.umbrella,
-        dirverDetails: req.body.dirverDetails,
-        ownerProfile: profile[0].path.split('uploads\\')[1],
+        dirverDetails: driverDetails,
+        ownerProfile: ownerProfile[0].path.split('uploads\\')[1],
         carPhotos: carPhotos.map(m => m.path.split('uploads\\')[1]),
         createdBy: req.user._id,
         status: "Pending"

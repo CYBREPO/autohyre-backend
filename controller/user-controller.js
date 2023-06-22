@@ -54,7 +54,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
         mobile: req.body.mobile,
         email: req.body.email,
         password: hashPassword,
-        profile: req.file.path.split('uploads\\')[1],
+        profile: req.file ?req.file?.path?.split('uploads\\')[1] : "",
         isAdmin: req.body.isAdmin ?? false,
     });
 

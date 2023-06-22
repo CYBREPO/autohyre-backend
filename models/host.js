@@ -31,7 +31,7 @@ const HostSchema = new mongoose.Schema(
         // "isSameAsOnwer":{
         //     type: Boolean
         // },
-        "dirverDetails": {
+        "driverDetails": {
             "drivingLicense": {
                 type: String,
             },
