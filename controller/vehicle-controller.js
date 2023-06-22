@@ -28,17 +28,24 @@ exports.getFilteredVehicleDetails = asyncHandler(async (req, res) => {
     let update = {}
     if (req.body) {
         if (req.body.make && req.body.make != "") {
-            update["make"] = { $in: req.body.make.split(",") }
+            update["make"] = { $in: req.body.make.split(",") };
         }
 
         if (req.body.category && req.body.category != "") {
-            update["type"] = { $in: req.body.category.split(",") }
+            update["type"] = { $in: req.body.category.split(",") };
         }
         if (req.body.price && req.body.price != "") {
-            update["price"] = { $lt: req.body.price }
+            update["price"] = { $lt: req.body.price };
         }
         if (req.body.id && req.body.id != "") {
-            update["_id"] = { $eq: req.body.id }
+            update["_id"] = { $eq: req.body.id };
+        }
+        if (req.body.location ) {
+            if(req.body.location?.state && req.body.location?.state != "")
+                update["location.state"] = { $eq: req.body.location.state };
+
+            if(req.body.loaction?.city && req.body.loaction?.city != "")
+                update["location.city"] = { $eq: req.body.location.city };
         }
 
     }
@@ -84,12 +91,13 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
     // try {
     if (req.body != null) {
 
-        const param = req.body;
+        let param = req.body;
+        param['location'] = JSON.parse(req.body.location);
 
         if (req.files) {
             param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
         }
-
+        console.log(param)
         let result = await vehicleModel.create(param);
 
         if (result) {
@@ -110,7 +118,6 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
                 "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
                 "description": req.body.description,
                 "vehicleId": result._id,
-                "location": req.body.location,
             }
 
             let requestBody = req.body;

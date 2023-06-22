@@ -19,7 +19,7 @@ const VehicleSchema = new mongoose.Schema(
         "images": [{
             type: String
         }],
-        "location": [{
+        "location": {
             "address": String,
             "addressLines": [String],
             "city": String,
@@ -33,7 +33,7 @@ const VehicleSchema = new mongoose.Schema(
             },
             "state": String,
             "timeZone": String
-        }],
+        },
         'createdBy': mongoose.Types.ObjectId,
         'modifiedBy': mongoose.Types.ObjectId,
     },
