@@ -30,7 +30,7 @@ exports.saveTeams = asyncHandler(async (req, res) => {
         //             name: item.name,
         //             designation: item.designation,
         //             description: item.description,
-        //             profile: leadersProfile[index].path.split('uploads\\')[1]
+        //             profile: leadersProfile[index].path.replace('\\','/').split('uploads/')[1]
         //         })
         //     }
         //     else {
@@ -50,7 +50,7 @@ exports.saveTeams = asyncHandler(async (req, res) => {
         //             name: item.name,
         //             designation: item.designation,
         //             description: item.description,
-        //             profile: boardsProfile[index].path.split('uploads\\')[1]
+        //             profile: boardsProfile[index].path.replace('\\','/').split('uploads/')[1]
         //         });
         //     }
         //     else {
@@ -66,7 +66,7 @@ exports.saveTeams = asyncHandler(async (req, res) => {
 
         const teams = await teamsModel.create({
             header: req.body.header,
-            bannerImg: bannerImg[0].path.split('uploads\\')[1],
+            bannerImg: bannerImg[0].path.replace('\\','/').split('uploads/')[1],
             leaders: [],
             boardOfDirectors: []
         });
@@ -97,7 +97,7 @@ exports.updateTeams = asyncHandler(async (req, res) => {
         //             name: item.name,
         //             designation: item.designation,
         //             description: item.description,
-        //             profile: leadersProfile[index].path.split('uploads\\')[1]
+        //             profile: leadersProfile[index].path.replace('\\','/').split('uploads/')[1]
         //         });
         //     }
         //     else {
@@ -120,7 +120,7 @@ exports.updateTeams = asyncHandler(async (req, res) => {
         //             name: item.name,
         //             designation: item.designation,
         //             description: item.description,
-        //             profile: boardsProfile[index].path.split('uploads\\')[1]
+        //             profile: boardsProfile[index].path.replace('\\','/').split('uploads/')[1]
         //         });
         //     }
         //     else {
@@ -140,7 +140,7 @@ exports.updateTeams = asyncHandler(async (req, res) => {
         }
 
         if (req.file) {
-            param["bannerImg"] = req.file.path.split('uploads\\')[1];
+            param["bannerImg"] = req.file.path.replace('\\','/').split('uploads/')[1];
         }
 
         const teams = await teamsModel.updateOne({ _id: req.body.id }, { $set: param });
@@ -169,7 +169,7 @@ exports.addUpdateTeamMember = asyncHandler(async (req, res) => {
     if (req.body) {
         let param = {};
         if (req.file) {
-            param['profile'] = req.file.path.split('uploads\\')[1];
+            param['profile'] = req.file.path.replace('\\','/').split('uploads/')[1];
         }
 
         param['name'] = req.body.name;

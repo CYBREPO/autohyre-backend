@@ -96,7 +96,7 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
         param['location'] = JSON.parse(req.body.location);
 
         if (req.files) {
-            param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
+            param['images'] = req.files.map(m => m.path.replace('\\','/').split('uploads/')[1])
         }
         
         let result = await vehicleModel.create(param);
@@ -161,7 +161,7 @@ exports.updateVehicleDetails = asyncHandler(async (req, res) => {
         param['location'] = JSON.parse(req.body.location);
 
         if (req.files) {
-            param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
+            param['images'] = req.files.map(m => m.path.replace('\\','/').split('uploads/')[1])
         }
         
         let result = await vehicleModel.findByIdAndUpdate({_id: req.body.id},param);

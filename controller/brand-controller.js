@@ -60,7 +60,7 @@ exports.getAllModels = asyncHandler(async (req, res) => {
 exports.setBrands = asyncHandler(async (req, res) => {
     if (req.body) {
         let finalImg = {
-            image: req.file.path.split('uploads\\')[1],
+            image: req.file.path.replace('\\','/').split('uploads/')[1],
             name: req.body.name,
             models: [],
             createdBy: req.user._id
@@ -84,7 +84,7 @@ exports.updateBrand = asyncHandler(async (req, res) => {
     if (req.body) {
         let update = {};
         if (req.file) {
-            update['image'] = req.file.path.split('uploads\\')[1];
+            update['image'] = req.file.path.replace('\\','/').split('uploads/')[1];
         }
 
         if (req.body.name != "" && req.body.name != null) {

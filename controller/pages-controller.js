@@ -115,8 +115,8 @@ exports.saveAboutus = asyncHandler(async (req, res) => {
 
         const result = await aboutusModel.create({
             header: req.body.header,
-            bannerImg: bannerImg[0].path.split('uploads\\')[1],
-            mainImg: mainImg[0].path.split('uploads\\')[1],
+            bannerImg: bannerImg[0].path.replace('\\','/').split('uploads/')[1],
+            mainImg: mainImg[0].path.replace('\\','/').split('uploads/')[1],
             body: req.body.body,
             footer: req.body.footer,
         });
@@ -144,10 +144,10 @@ exports.updateAboutus = asyncHandler(async (req, res) => {
         };
 
         if (bannerImg)
-            param["bannerImg"] = bannerImg[0].path.split('uploads\\')[1];
+            param["bannerImg"] = bannerImg[0].path.replace('\\','/').split('uploads/')[1];
 
         if (mainImg)
-            param["mainImg"] = mainImg[0].path.split('uploads\\')[1];
+            param["mainImg"] = mainImg[0].path.replace('\\','/').split('uploads/')[1];
 
         const result = await aboutusModel.updateOne({ _id: req.body.id }, { $set: param });
 
@@ -187,8 +187,8 @@ exports.saveHome = asyncHandler(async (req, res) => {
         const result = await homeModel.create({
             bannerContent: req.body.bannerContent,
             header: req.body.header,
-            bannerImages: bannerImages.map(m => m.path.split('uploads\\')[1]),
-            mainImg: mainImg[0].path.split('uploads\\')[1],
+            bannerImages: bannerImages.map(m => m.path.replace('\\','/').split('uploads/')[1]),
+            mainImg: mainImg[0].path.replace('\\','/').split('uploads/')[1],
             body: req.body.body,
             footer: req.body.footer,
         });
@@ -216,11 +216,11 @@ exports.updateHome = asyncHandler(async (req, res) => {
         }
 
         if (bannerImages && bannerImages.length > 0) {
-            param['bannerImages'] = bannerImages.map(m => m.path.split('uploads\\')[1]);
+            param['bannerImages'] = bannerImages.map(m => m.path.replace('\\','/').split('uploads/')[1]);
         }
 
         if (mainImg) {
-            param['mainImg'] = mainImg[0].path.split('uploads\\')[1];
+            param['mainImg'] = mainImg[0].path.replace('\\','/').split('uploads/')[1];
         }
 
 

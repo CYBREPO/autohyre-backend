@@ -22,8 +22,8 @@ exports.createHost = asyncHandler(async (req, res) => {
     let driverDetails = {
         driverName : req.body.driverName,
         drivingLicense : req.body.drivingLicense,
-        driverProfile : req.body.sameDriver ? ownerProfile[0].path.split('uploads\\')[1] : 
-        driverProfile[0].path.split('uploads\\')[1],
+        driverProfile : req.body.sameDriver ? ownerProfile[0].path.replace('\\','/').split('uploads/')[1] : 
+        driverProfile[0].path.replace('\\','/').split('uploads/')[1],
         driverMobile : req.body.driverMobile,
     }
 
@@ -51,8 +51,8 @@ exports.createHost = asyncHandler(async (req, res) => {
         cCaution: req.body.cCaution,
         umbrella: req.body.umbrella,
         dirverDetails: driverDetails,
-        ownerProfile: ownerProfile[0].path.split('uploads\\')[1],
-        carPhotos: carPhotos.map(m => m.path.split('uploads\\')[1]),
+        ownerProfile: ownerProfile[0].path.replace('\\','/').split('uploads/')[1],
+        carPhotos: carPhotos.map(m => m.path.replace('\\','/').split('uploads/')[1]),
         createdBy: req.user._id,
         status: "Pending"
     });

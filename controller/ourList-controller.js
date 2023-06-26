@@ -28,8 +28,8 @@ exports.saveOurLink = asyncHandler(async (req, res) => {
 
         const result = await ourListModel.create({
             header: req.body.header,
-            bannerImg: bannerImg[0].path.split('uploads\\')[1],
-            mainImg: mainImg[0].path.split('uploads\\')[1],
+            bannerImg: bannerImg[0].path.replace('\\','/').split('uploads/')[1],
+            mainImg: mainImg[0].path.replace('\\','/').split('uploads/')[1],
             features: featuredArr,
             body: req.body.body,
             footer: req.body.footer,
@@ -68,10 +68,10 @@ exports.updateOurList = asyncHandler(async (req, res) => {
         }
 
         if (bannerImg){}
-            param['bannerImg'] = bannerImg[0].path.split('uploads\\')[1];
+            param['bannerImg'] = bannerImg[0].path.replace('\\','/').split('uploads/')[1];
 
         if (mainImg)
-            param['mainImg'] = mainImg[0].path.split('uploads\\')[1];
+            param['mainImg'] = mainImg[0].path.replace('\\','/').split('uploads/')[1];
 
         const result = await ourListModel.updateOne({ _id: req.body.id }, { $set: param });
 

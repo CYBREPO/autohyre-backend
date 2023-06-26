@@ -51,7 +51,7 @@ exports.removeFiles = async (filePaths) => {
 
     try {
         filePaths.forEach(filePath => {
-            const pathToFile = "uploads\\" + filePath;
+            const pathToFile = "uploads/" + filePath;
             fs.unlinkSync(pathToFile);
         });
         console.log("Successfully deleted the file.");

@@ -54,7 +54,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
         mobile: req.body.mobile,
         email: req.body.email,
         password: hashPassword,
-        profile: req.file ?req.file?.path?.split('uploads\\')[1] : "",
+        profile: req.file ?req.file?.path?.split('uploads/')[1] : "",
         isAdmin: req.body.isAdmin ?? false,
     });
 
@@ -219,7 +219,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
             // if (usrP && usrP.profile)
             //     fileUploadController.removeFiles([usrP.profile]);
 
-            update['profile'] = req.file.path.split('uploads\\')[1]
+            update['profile'] = req.file.path.replace('\\','/').split('uploads/')[1]
 
         }
         update['name'] = req.body.name;
