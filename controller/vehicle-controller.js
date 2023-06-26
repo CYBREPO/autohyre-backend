@@ -7,6 +7,7 @@ const fileUploads = require('./fileUpload-controller');
 const { email } = require('./email');
 const asyncHandler = require('express-async-handler');
 const userModel = require('../models/user').user;
+const quotReqModel = require('../models/quotationRequest').quotationRequest;
 
 let vehicleModel = model.vehicle;
 let vehicleFeature = featureModel.vehicle_features;
@@ -216,16 +217,38 @@ exports.getVehicles = asyncHandler(async (req, res) => {
 
 exports.sendMail = asyncHandler(async (req, res) => {
     if (req.body.vehicleId) {
-        let v = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
+        let veh = await vehicleModel.findOne({ _id: req.body.vehicleId }).exec();
         let admin = await userModel.find({ isAdmin: true }).exec();
-        let emailBody = {
+
+        //save quotation request
+
+        let rst = await quotReqModel.create({
+            userDetails: {
+                name: req.user?.name ?? "",
+                email: req.user?.email ?? "",
+                id: req.user?._id
+            },
+            vehicleDetails: {
+                make: req.body.make,
+                model: req.body.model,
+                type: req.body.type,
+                year: req.body.year,
+            },
+            pickupLocation: req.body.pickupLocation,
+            dropLocation: req.body.dropLocation,
+            pickupDate:  req.body.pickupDate,
+            dropDate:  req.body.dropDate,
+            additionalInfo: req.body.information
+        });
+        if(rst){
+            let emailBody = {
             body: {
                 name: 'User',
                 intro: '',
                 table: {
                     data: [{
-                        name: req.body.userDetails?.name ?? "",
-                        email: req.body.userDetails?.email ?? "",
+                        name: req.user?.name ?? "",
+                        email: req.user?.email ?? "",
                         make: req.body.make,
                         model: req.body.model,
                         type: req.body.type,
@@ -233,7 +256,7 @@ exports.sendMail = asyncHandler(async (req, res) => {
                         pickup: req.body.pickupLocation?.address,
                         pickupDate: req.body.pickupDate,
                         drop: req.body.dropLocation?.address,
-                        dropDate: req.body.dropLocation?.address,
+                        dropDate: req.body.dropDate,
                         information: req.body.information
 
                     }]
@@ -242,12 +265,20 @@ exports.sendMail = asyncHandler(async (req, res) => {
             }
         };
 
-        const mails = admin.map(m => m.email).toString() + "," + req.body.userDetails?.email;
+        const mails = admin.map(m => m.email).toString() + "," + req.user?.email;
 
-        let info = await email({ ...v, mails: mails, email: emailBody });
+        let info = await email({ ...veh, mails: mails, email: emailBody });
 
-        res.status(200).json({ message: "success" });
+        res.status(200).json({success: true, message: "mail has been triggered successfully" });
+        }
+        
     }
+});
+
+exports.geAllQuotationRequests = asyncHandler(async (req, res) => {
+    let result =  await quotReqModel.find({});
+
+    res.status(200).json({success:true, data: result });
 });
 
 

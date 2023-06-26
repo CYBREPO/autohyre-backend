@@ -85,8 +85,8 @@ exports.saveTeams = asyncHandler(async (req, res) => {
 exports.updateTeams = asyncHandler(async (req, res) => {
     if (req.body) {
         const { leaders, boardOfDirectors } = req.body;
-        const { bannerImg, leadersProfile, boardsProfile } = req.files;
-
+//         const { bannerImg, leadersProfile, boardsProfile } = req.files;
+// console.log(bannerImg)
         const dbTeam = await teamsModel.findById(req.body.id);
 
 
@@ -139,8 +139,8 @@ exports.updateTeams = asyncHandler(async (req, res) => {
             // boardOfDirectors: boardArr
         }
 
-        if (bannerImg) {
-            param["bannerImg"] = bannerImg[0].path.split('uploads\\')[1];
+        if (req.file) {
+            param["bannerImg"] = req.file.path.split('uploads\\')[1];
         }
 
         const teams = await teamsModel.updateOne({ _id: req.body.id }, { $set: param });
@@ -197,7 +197,7 @@ exports.addUpdateTeamMember = asyncHandler(async (req, res) => {
                 let rst = await teamsModel.findOneAndUpdate({}, { $push: update });
 
                 if (rst)
-                    return res.status(constants.OK).json({ success: true, message: "Member Updated successfully" });
+                    return res.status(constants.OK).json({ success: true, message: "Member Updated successfully",data: result});
 
             }
             res.status(constants.VALIDATION_ERROR);
@@ -219,7 +219,7 @@ exports.addUpdateTeamMember = asyncHandler(async (req, res) => {
                 let rst = await teamsModel.findOneAndUpdate({}, { $push: update });
 
                 if (rst)
-                    return res.status(constants.OK).json({ success: true, message: "Member Saved successfully" });
+                    return res.status(constants.OK).json({ success: true, message: "Member Saved successfully", data: result});
 
             }
             res.status(constants.VALIDATION_ERROR);
@@ -233,18 +233,19 @@ exports.addUpdateTeamMember = asyncHandler(async (req, res) => {
 
 exports.deleteTeamMember = asyncHandler(async (req,res) => {
     if(req.query.id){
-        let del = await teamsMemberModel.findByIdAndUpdate({_id: req.query.id});
+        let del = await teamsMemberModel.findByIdAndDelete({_id: req.query.id});
 
         if(del){
             fileUploadController.removeFiles([del.profile]);
             let itemDel = {}
+            console.log(del)
             if(del.title == "leaders"){
-                itemDel['leaders'] = del_id;
+                itemDel['leaders'] = del._id;
             }
             else{
-                itemDel['boardOfDirectors'] = del_id;
+                itemDel['boardOfDirectors'] = del._id;
             }
-            let delTeam =  await teamsModel.findByIdAndUpdate({},{$pull: itemDel});
+            let delTeam =  await teamsModel.findByIdAndUpdate({_id: req.query.teamId},{$pull: itemDel});
 
             if(delTeam)
                 return res.status(constants.OK).json({success: true, message: "Member Removed Successfully"});
