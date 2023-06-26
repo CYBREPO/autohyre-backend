@@ -10,4 +10,5 @@ exports.router = router.get("/getVehicle",controller.getVehicleDetails)
                         .post("/getVehicles",controller.getVehicles)
                         .get("/getAdditionDetails",controller.getAdditionDetails)
                         .post("/setVehicleDetails",validateToken,store.store.array('images'),controller.setVehicleDetails)
+                        .post("/updateVehicleDetails",validateToken,store.store.array('images'),controller.updateVehicleDetails)
                         .post("/getFilteredVehicleDetails",controller.getFilteredVehicleDetails);

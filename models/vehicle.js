@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const VehicleSchema = new mongoose.Schema(
     {
         "automaticTransmission": Boolean,
-        "id": Number,
         "make": String,
         "marketAreaId": String,
         "marketCountry": String,

@@ -97,7 +97,7 @@ exports.setVehicleDetails = asyncHandler(async (req, res) => {
         if (req.files) {
             param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
         }
-        console.log(param)
+        
         let result = await vehicleModel.create(param);
 
         if (result) {
@@ -155,32 +155,48 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
 //update vehile details
 exports.updateVehicleDetails = asyncHandler(async (req, res) => {
     if (req.body != null) {
-        let basicparams = {
-            "averageFuelEconomy": req.body.averageFuelEconomy,
-            "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
-            "cityFuelEconomy": req.body.cityFuelEconomy,
-            "fuelGrade": req.body.fuelGrade,
-            "fuelType": req.body.fuelType,
-            "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
-            "fuelUnit": req.body.fuelUnit,
-            "fuelUnitLabel": req.body.fuelUnitLabel,
-            "highwayFuelEconomy": req.body.highwayFuelEconomy,
-            "numberOfDoors": req.body.numberOfDoors,
-            "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
-            "numberOfSeats": req.body.numberOfSeats,
-            "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
-            "description": req.body.description,
-            "vehicleId": result._id,
-            "location": req.body.location,
+        let param = req.body;
+        // console.log(param)
+        param['location'] = JSON.parse(req.body.location);
+
+        if (req.files) {
+            param['images'] = req.files.map(m => m.path.split('uploads\\')[1])
         }
-        const vehicle = new vehicleModel.updateOne({ _id: req.body.id }, { $set: basicparams });
-        if (vehicle) {
+        
+        let result = await vehicleModel.findByIdAndUpdate({_id: req.body.id},param);
+
+        if (result) {
+            //save basic details
+            let basicparams = {
+                "averageFuelEconomy": req.body.averageFuelEconomy,
+                "averageFuelEconomyWithLabel": req.body.averageFuelEconomy + " " + req.body.fuelUnitLabel,
+                "cityFuelEconomy": req.body.cityFuelEconomy,
+                "fuelGrade": req.body.fuelGrade,
+                "fuelType": req.body.fuelType,
+                "fuelTypeAndGradeLabel": (req.body.fuelType.label + " (" + req.body.fuelGrade + ")"),
+                "fuelUnit": req.body.fuelUnit,
+                "fuelUnitLabel": req.body.fuelUnitLabel,
+                "highwayFuelEconomy": req.body.highwayFuelEconomy,
+                "numberOfDoors": req.body.numberOfDoors,
+                "numberOfDoorsLabel": (req.body.numberOfDoors + " Doors"),
+                "numberOfSeats": req.body.numberOfSeats,
+                "numberOfSeatsLabel": (req.body.numberOfSeats + " Seats"),
+                "description": req.body.description,
+                "vehicleId": result._id,
+            }
+
+            let requestBody = req.body;
+            requestBody["vehicleId"] = result._id;
+            const features = await vehicleFeature.findByIdAndUpdate({_id: req.body.featureId},requestBody);
+            const basic = await vehicleDetails.findByIdAndUpdate({_id: req.body.vehicleDetailsId},basicparams);
             let message = "Vehicle updated save successfully";
-            return res.status(constant.OK).json({success: true, message: message, data: vehicle });
+            return res.status(constant.OK).json({success: true, message: message, data: result });
         }
-        return res.status(constant.VALIDATION_ERROR);
-        throw new Error('Something went wrong')
+        res.status(constant.VALIDATION_ERROR);
+        throw new Error('Something went wrong');
     }
+    res.status(constant.VALIDATION_ERROR);
+    throw new Error('Invalid request');
 });
 
 exports.getVehicles = asyncHandler(async (req, res) => {
