@@ -153,13 +153,13 @@ exports.updateAboutus = asyncHandler(async (req, res) => {
 
         if (result) {
             let imgs = [];
-            if(result.bannerImg && bannerImg)
+            if (result.bannerImg && bannerImg)
                 imgs.push(result.bannerImg);
 
-            if(result.mainImg && mainImg)
+            if (result.mainImg && mainImg)
                 imgs.push(result.mainImg);
-            
-            if(imgs && imgs.length > 0)
+
+            if (imgs && imgs.length > 0)
                 fileUploadController.removeFiles(imgs);
             return res.status(constant.OK).json({ success: true, message: "about us saved successfully" });
         }
@@ -207,7 +207,7 @@ exports.saveHome = asyncHandler(async (req, res) => {
 exports.updateHome = asyncHandler(async (req, res) => {
     if (req.body) {
         const { bannerImages, mainImg } = req.files;
-
+        console.log(req.files);
         let param = {
             bannerContent: req.body.bannerContent,
             header: req.body.header,
@@ -228,13 +228,13 @@ exports.updateHome = asyncHandler(async (req, res) => {
 
         if (result) {
             let imgs = [];
-            if(result.bannerImages && bannerImages && bannerImages.length > 0)
+            if (result.bannerImages && bannerImages && bannerImages.length > 0)
                 imgs.push(...result.bannerImages);
 
-            if(result.mainImg && mainImg)
+            if (result.mainImg && mainImg)
                 imgs.push(result.mainImg);
-            
-            if(imgs && imgs.length > 0)
+
+            if (imgs && imgs.length > 0)
                 fileUploadController.removeFiles(imgs);
 
             return res.status(constant.OK).json({ success: true, message: "Home page Updated successfully" });
