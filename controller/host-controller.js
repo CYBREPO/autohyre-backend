@@ -26,19 +26,25 @@ exports.createHost = asyncHandler(async (req, res) => {
         driverProfile[0].path.split('uploads\\')[1],
         driverMobile : req.body.driverMobile,
     }
+
+    let payOut = {
+        bankName : req.body.bankName,
+        accountName : req.body.accountName,
+        accountNumber : req.body.accountNumber
+    }
     
     const host = await hostModel.create({
         make: req.body.make,
         model: req.body.model,
         year: req.body.year,
         vin: req.body.vin,
-        ownerMobile: req.body.mobile,
+        ownerMobile: req.body.ownerMobile,
         carAvailability: req.body.carAvailability,
         carDetail: req.body.carDetail,
         safetyQuantity: req.body.safetyQuantity,
         drivingLicense: req.body.drivingLicense,
         goals: req.body.goals,
-        payout: req.body.payout,
+        payout: payOut,
         ownerName: req.body.ownerName,
         airBags: req.body.airBags,
         fireExtinguisher: req.body.fireExtinguisher,
