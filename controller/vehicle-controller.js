@@ -276,9 +276,18 @@ exports.sendMail = asyncHandler(async (req, res) => {
 });
 
 exports.geAllQuotationRequests = asyncHandler(async (req, res) => {
-    let result =  await quotReqModel.find({});
-
-    res.status(200).json({success:true, data: result });
+    let { pageSize, pageIndex, searchText } = req.body;
+    let query = {};
+    if (searchText && searchText != "") {
+        query['$text'] = { $search: searchText };
+    }
+    const totalCount = await quotReqModel.countDocuments(query);
+    if (totalCount > pageSize) {
+        const result = await quotReqModel.find(query).skip((pageIndex - 1) * pageSize).limit(pageSize).exec();
+        return res.status().json({ success: true, data: result, count: totalCount });
+    }
+    const result = await quotReqModel.find(query).exec();
+    return res.status(constant.OK).json({ success: true, data: result, count: totalCount });
 });
 
 

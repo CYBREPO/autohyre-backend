@@ -78,5 +78,5 @@ const quotationRequestSchema = mongoose.Schema(
         timestamps: true
     }
 );
-
+quotationRequestSchema.index({ "userDetails.name": 'text', "vehicleDetails.model": 'text', "vehicleDetails.year": 'text', "vehicleDetails.make": "text"});
 exports.quotationRequest = mongoose.model('quotationRequest', quotationRequestSchema);
